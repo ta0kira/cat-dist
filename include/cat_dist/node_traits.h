@@ -30,8 +30,8 @@ struct TreeNodeOperations {
   static std::unique_ptr<N>& GetLowerNode(N& node) { return node.GetLowerNode(); }
   static V& GetValue(N& node) { return node.GetValue(); }
 
-  static std::unique_ptr<N> SetHigherNode(N& node, std::unique_ptr<N> child) { return node.SetHigherNode(std::move(child)); }
-  static std::unique_ptr<N> SetLowerNode(N& node, std::unique_ptr<N> child) { return node.SetLowerNode(std::move(child)); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> SetHigherNode(N& node, std::unique_ptr<N> child) { return node.SetHigherNode(std::move(child)); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> SetLowerNode(N& node, std::unique_ptr<N> child) { return node.SetLowerNode(std::move(child)); }
   static void SetValue(N& node, V value) { node.SetValue(std::move(value)); }
   static void UpdateNode(N& node) { node.UpdateNode(); }
 };
