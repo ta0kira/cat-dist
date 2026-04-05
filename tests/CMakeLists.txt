@@ -15,6 +15,8 @@ add_executable(tests
   auto_balanced_tree_test.cc
   categorical_distribution_test.cc)
 
-target_link_libraries(tests
-  cat_dist
-  Catch2::Catch2WithMain)
+target_include_directories(tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+
+target_compile_options(tests PRIVATE -Wall -g)
+
+target_link_libraries(tests cat_dist Catch2::Catch2WithMain)

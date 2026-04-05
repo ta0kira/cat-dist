@@ -1,7 +1,7 @@
 #ifndef CAT_DIST_NODE_TRAITS_H_
 #define CAT_DIST_NODE_TRAITS_H_
 
-#include<memory>
+#include <memory>
 
 namespace cat_dist {
 
@@ -30,8 +30,8 @@ struct TreeNodeOperations {
   static std::unique_ptr<N>& GetLowerNode(N& node) { return node.GetLowerNode(); }
   static V& GetValue(N& node) { return node.GetValue(); }
 
-  static void SetHigherNode(N& node, std::unique_ptr<N> child) { node.SetHigherNode(std::move(child)); }
-  static void SetLowerNode(N& node, std::unique_ptr<N> child) { node.SetLowerNode(std::move(child)); }
+  static std::unique_ptr<N> SetHigherNode(N& node, std::unique_ptr<N> child) { return node.SetHigherNode(std::move(child)); }
+  static std::unique_ptr<N> SetLowerNode(N& node, std::unique_ptr<N> child) { return node.SetLowerNode(std::move(child)); }
   static void SetValue(N& node, V value) { node.SetValue(std::move(value)); }
   static void UpdateNode(N& node) { node.UpdateNode(); }
 };

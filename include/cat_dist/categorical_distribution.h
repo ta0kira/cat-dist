@@ -1,7 +1,7 @@
 #ifndef CAT_DIST_CATEGORICAL_DISTRIBUTION_H_
 #define CAT_DIST_CATEGORICAL_DISTRIBUTION_H_
 
-#include<memory>
+#include <memory>
 
 #include "auto_balanced_tree.h"
 #include "node_traits.h"
@@ -16,6 +16,7 @@ class CategoricalDistribution {
   void SetWeight(const C& category, const W& weight);
   W GetWeight(const C& category) const;
   const C* LocateByWeight(const W& weight) const;
+  const C* LocateByWeight(const W& weight, const W& adjust);
 
  private:
   class CategoricalNode;
@@ -39,7 +40,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
     higher_child_(other.higher_child_ ? TreeNodeAllocation<CategoricalNode>::CopyNode(*other.higher_child_) : nullptr),
     lower_child_(other.lower_child_ ? TreeNodeAllocation<CategoricalNode>::CopyNode(*other.lower_child_) : nullptr) {}
 
-  static const C* LocateByWeight(const CategoricalNode* node, W weight);
+  static const CategoricalNode* LocateByWeight(const CategoricalNode* node, const W& weight);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : W(); }
 
   const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
@@ -52,8 +53,16 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   std::unique_ptr<CategoricalNode>& GetLowerNode() { return lower_child_; }
   W& GetValue() { return size_; }
 
-  void SetHigherNode(std::unique_ptr<CategoricalNode> child) { higher_child_ = std::move(child); }
-  void SetLowerNode(std::unique_ptr<CategoricalNode> child) { lower_child_ = std::move(child); }
+  std::unique_ptr<CategoricalNode> SetHigherNode(std::unique_ptr<CategoricalNode> child) {
+    auto old_child = std::move(higher_child_);
+    higher_child_ = std::move(child);
+    return old_child;
+  }
+  std::unique_ptr<CategoricalNode> SetLowerNode(std::unique_ptr<CategoricalNode> child) {
+    auto old_child = std::move(lower_child_);
+    lower_child_ = std::move(child);
+    return old_child;
+  }
   void SetValue(W value) { size_ = std::move(value); }
   void UpdateNode();
 
@@ -66,9 +75,8 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   std::unique_ptr<CategoricalNode> lower_child_;
 };
 
-
 template<class C, class W>
-const C* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, W weight) {
+const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, const W& weight) {
   if (node && weight < node->total_) {
     if (node->lower_child_) {
       if (weight < node->lower_child_->total_) {
@@ -78,7 +86,7 @@ const C* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const Ca
       }
     }
     if (weight < node->size_) {
-      return &node->category_;
+      return node;
     } else {
       weight -= node->size_;
     }
@@ -122,13 +130,25 @@ void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight
 
 template<class C, class W>
 W CategoricalDistribution<C, W>::GetWeight(const C& category) const {
-  const W* weight = tree_.Get(category);
-  return weight ? weight : W();
+  const CategoricalNode* node = tree_.Get(category);
+  return node ? node->size_ : W();
 }
 
 template<class C, class W>
 const C* CategoricalDistribution<C, W>::LocateByWeight(const W& weight) const {
-  return CategoricalNode::LocateByWeight(tree_.root_node(), weight);
+  const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
+  return node ? node->category_ : nullptr;
+}
+
+template<class C, class W>
+const C* CategoricalDistribution<C, W>::LocateByWeight(const W& weight, const W& adjust) {
+  const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
+  if (node) {
+    SetWeight(node->category_, node->size_ + adjust);
+    return node->category_;
+  } else {
+    return nullptr;
+  }
 }
 
 }  // namespace cat_dist
