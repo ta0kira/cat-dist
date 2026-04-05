@@ -376,7 +376,7 @@ std::unique_ptr<N> AutoBalancedTree<N>::RemoveLowest(std::unique_ptr<N>& node, s
   }
 }
 
-#undef NDEBUG
+#undef ASSERT_NULL_RETURN
 
 }  // namespace cat_dist
 
