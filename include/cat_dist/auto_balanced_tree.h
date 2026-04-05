@@ -44,12 +44,12 @@ class AutoBalancedTree {
   static int Exchange(std::unique_ptr<N>& node, const K& key, const V* value, std::unique_ptr<N>& new_root);
   static const N* Find(const N* node, const K& key);
   static N* Find(N* node, const K& key);
-  static std::unique_ptr<N> Rebalance(std::unique_ptr<N>& node);
-  static std::unique_ptr<N> PivotHigher(std::unique_ptr<N>& node);
-  static std::unique_ptr<N> PivotLower(std::unique_ptr<N>& node);
-  static std::unique_ptr<N> Remove(std::unique_ptr<N>& node);
-  static std::unique_ptr<N> RemoveHighest(std::unique_ptr<N>& node, std::unique_ptr<N>& new_root);
-  static std::unique_ptr<N> RemoveLowest(std::unique_ptr<N>& node, std::unique_ptr<N>& new_root);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> Rebalance(std::unique_ptr<N>& node);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> PivotHigher(std::unique_ptr<N>& node);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> PivotLower(std::unique_ptr<N>& node);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> Remove(std::unique_ptr<N>& node);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> RemoveHighest(std::unique_ptr<N>& node, std::unique_ptr<N>& new_root);
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> RemoveLowest(std::unique_ptr<N>& node, std::unique_ptr<N>& new_root);
 
   int node_count_ = 0;
   std::unique_ptr<N> root_node_;

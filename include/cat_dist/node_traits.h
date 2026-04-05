@@ -9,8 +9,8 @@ template<class N>
 struct TreeNodeAllocation {
   using K = typename N::K;
 
-  static std::unique_ptr<N> NewNode(K key) { return std::make_unique<N>(std::move(key)); }
-  static std::unique_ptr<N> CopyNode(const N& node) { return std::make_unique<N>(node); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(K key) { return std::make_unique<N>(std::move(key)); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> CopyNode(const N& node) { return std::make_unique<N>(node); }
 };
 
 template<class N>
