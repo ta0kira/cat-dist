@@ -179,28 +179,43 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("functional test") {
-    const int count = 1000;
-    const int perm = 477;
+    const int count = 100;
+    const int perm = 47;
     const int offset = 12;
 
     for (int i = 0; i < count; ++i) {
+      const std::string error_note = "[insert iteration " + std::to_string(i) + "] ";
       const int value = (i*perm+offset)%count;
       const std::string key = std::to_string(value);
       tree.Set(key, value);
-      REQUIRE_THAT(tree.Get(key), NodeValueMatches(value));
+      REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
       REQUIRE(tree.node_count() == i+1);
-      REQUIRE_THAT(tree, IsBalanced());
-      REQUIRE_THAT(tree, HasCorrectCount());
+      REQUIRE_THAT(tree, IsBalanced(error_note));
+      REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
 
     for (int i = 0; i < count; ++i) {
+      const std::string error_note = "[check iteration " + std::to_string(i) + "] ";
+      const int value = (i*perm+offset)%count;
+      const std::string key = std::to_string(value);
+      REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
+    }
+
+    for (int i = 0; i < count; ++i) {
+      const std::string error_note = "[remove iteration " + std::to_string(i) + "] ";
       const int value = (i*perm+offset)%count;
       const std::string key = std::to_string(value);
       tree.Unset(key);
       REQUIRE(tree.Get(key) == nullptr);
       REQUIRE(tree.node_count() == count-i-1);
-      REQUIRE_THAT(tree, IsBalanced());
-      REQUIRE_THAT(tree, HasCorrectCount());
+      for (int j = i+1; j < count; ++j) {
+        const std::string error_note2 = "[remove iteration " + std::to_string(i) + ":" + std::to_string(i) + "] ";
+        const int value2 = (j*perm+offset)%count;
+        const std::string key2 = std::to_string(value2);
+        REQUIRE_THAT(tree.Get(key2), NodeValueMatches(value2, error_note2));
+      }
+      REQUIRE_THAT(tree, IsBalanced(error_note));
+      REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
   }
 
