@@ -33,6 +33,7 @@ class AutoBalancedTree {
   const void Unset(const K& key);
 
   bool CheckBalance(std::ostream* error_log) const;
+  bool CheckOrder(std::ostream* error_log) const;
   bool ValidateCount(std::ostream* error_log) const;
 
  private:
@@ -40,6 +41,7 @@ class AutoBalancedTree {
 
   static int GetBalance(const N* node);
   static bool CheckBalance(const N* node, std::ostream* error_log);
+  static bool CheckOrder(const N* node, std::ostream* error_log);
   static int CountNodes(const N* node);
   static int Exchange(std::unique_ptr<N>& node, const K& key, const V* value, std::unique_ptr<N>& new_root);
   static const N* Find(const N* node, const K& key);
@@ -133,6 +135,11 @@ bool AutoBalancedTree<N>::ValidateCount(std::ostream* error_log) const {
 }
 
 template<class N>
+bool AutoBalancedTree<N>::CheckOrder(std::ostream* error_log) const {
+  return CheckOrder(root_node_.get(), error_log);
+}
+
+template<class N>
 void AutoBalancedTree<N>::ClearRoot() {
   root_node_ = nullptr;
 }
@@ -163,6 +170,35 @@ bool AutoBalancedTree<N>::CheckBalance(const N* node, std::ostream* error_log) {
     is_balanced &= CheckBalance(TreeNodeOperations<N>::GetLowerNode(*node).get(), error_log);
   }
   return is_balanced;
+}
+
+template<class N>
+bool AutoBalancedTree<N>::CheckOrder(const N* node, std::ostream* error_log) {
+  bool is_ordered = true;
+  if (node) {
+    const K& key = TreeNodeOperations<N>::GetKey(*node);
+    if (const auto& higher = TreeNodeOperations<N>::GetHigherNode(*node)) {
+      const K& higher_key = TreeNodeOperations<N>::GetKey(*higher);
+      if (!TreeNodeOperations<N>::KeyLessThan(key, higher_key)) {
+        is_ordered = false;
+        if (error_log) {
+          *error_log << "higher child of node " << key << " has key " << higher_key << std::endl;
+        }
+      }
+      is_ordered &= CheckOrder(higher.get(), error_log);
+    }
+    if (const auto& lower = TreeNodeOperations<N>::GetLowerNode(*node)) {
+      const K& lower_key = TreeNodeOperations<N>::GetKey(*lower);
+      if (!TreeNodeOperations<N>::KeyLessThan(lower_key, key)) {
+        is_ordered = false;
+        if (error_log) {
+          *error_log << "lower child of node " << key << " has key " << lower_key << std::endl;
+        }
+      }
+      is_ordered &= CheckOrder(lower.get(), error_log);
+    }
+  }
+  return is_ordered;
 }
 
 template<class N>

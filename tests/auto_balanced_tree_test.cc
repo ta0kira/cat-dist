@@ -191,6 +191,7 @@ TEST_CASE("AutoBalancedTree") {
       REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
       REQUIRE(tree.node_count() == i+1);
       REQUIRE_THAT(tree, IsBalanced(error_note));
+      REQUIRE_THAT(tree, IsOrderedCorrectly(error_note));
       REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
 
@@ -215,10 +216,12 @@ TEST_CASE("AutoBalancedTree") {
         REQUIRE_THAT(tree.Get(key2), NodeValueMatches(value2, error_note2));
       }
       REQUIRE_THAT(tree, IsBalanced(error_note));
+      REQUIRE_THAT(tree, IsOrderedCorrectly(error_note));
       REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
   }
 
   CHECK_THAT(tree, IsBalanced());
+  CHECK_THAT(tree, IsOrderedCorrectly());
   CHECK_THAT(tree, HasCorrectCount());
 }

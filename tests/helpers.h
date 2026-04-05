@@ -26,6 +26,24 @@ class IsBalanced : public Catch::Matchers::MatcherGenericBase {
   mutable std::ostringstream output_;
 };
 
+class IsOrderedCorrectly : public Catch::Matchers::MatcherGenericBase {
+ public:
+  explicit IsOrderedCorrectly(std::string note = "") : note_(std::move(note)) {}
+
+  template<class N>
+  bool match(const AutoBalancedTree<N>& tree) const {
+    return tree.CheckOrder(&output_);
+  }
+
+  std::string describe() const override {
+    return note_ + "should be ordered correctly\n" + output_.str();
+  }
+
+ private:
+  const std::string note_;
+  mutable std::ostringstream output_;
+};
+
 class HasCorrectCount : public Catch::Matchers::MatcherGenericBase {
  public:
   explicit HasCorrectCount(std::string note = "") : note_(std::move(note)) {}
@@ -45,9 +63,9 @@ class HasCorrectCount : public Catch::Matchers::MatcherGenericBase {
 };
 
 template<class T>
-class NodeValueMatches : public Catch::Matchers::MatcherGenericBase {
+class CheckNodeValueMatches : public Catch::Matchers::MatcherGenericBase {
  public:
-  explicit NodeValueMatches(const T& expected, std::string note = "") : note_(std::move(note)), expected_(expected) {}
+  explicit CheckNodeValueMatches(const T& expected, std::string note = "") : note_(std::move(note)), expected_(expected) {}
 
   template<class N>
   bool match(const N* node) const {
@@ -62,6 +80,11 @@ class NodeValueMatches : public Catch::Matchers::MatcherGenericBase {
   const std::string note_;
   const T& expected_;
 };
+
+template<class T>
+CheckNodeValueMatches<T> NodeValueMatches(const T& expected, std::string note = "") {
+  return CheckNodeValueMatches<T>(expected, std::move(note));
+}
 
 }  // namespace cat_dist::tests
 
