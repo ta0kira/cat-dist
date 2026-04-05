@@ -59,6 +59,12 @@ class AutoBalancedTree {
 
 namespace cat_dist {
 
+#define ASSERT_NULL_RETURN(stmt) \
+  do { \
+    const auto discarded_result = stmt; \
+    assert(!discarded_result); \
+  } while (0)
+
 template<class N>
 AutoBalancedTree<N>::AutoBalancedTree(const AutoBalancedTree& other) {
   root_node_ = other.root_node_ ? TreeNodeAllocation<N>::CopyNode(*other.root_node_) : nullptr;
@@ -182,14 +188,12 @@ int AutoBalancedTree<N>::Exchange(std::unique_ptr<N>& node, const K& key, const 
   } else if (TreeNodeOperations<N>::KeyLessThan(key, TreeNodeOperations<N>::GetKey(*node))) {
     std::unique_ptr<N> new_root2;
     size_change = Exchange(TreeNodeOperations<N>::GetLowerNode(*node), key, value, new_root2);
-    auto discard = TreeNodeOperations<N>::SetLowerNode(*node, std::move(new_root2));
-    assert(!discard);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*node, std::move(new_root2)));
     new_root = Rebalance(node);
   } else if (TreeNodeOperations<N>::KeyLessThan(TreeNodeOperations<N>::GetKey(*node), key)) {
     std::unique_ptr<N> new_root2;
     size_change = Exchange(TreeNodeOperations<N>::GetHigherNode(*node), key, value, new_root2);
-    auto discard = TreeNodeOperations<N>::SetHigherNode(*node, std::move(new_root2));
-    assert(!discard);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*node, std::move(new_root2)));
     new_root = Rebalance(node);
   } else if (value) {
     TreeNodeOperations<N>::SetValue(*node, *value);
@@ -249,17 +253,14 @@ template<class N>
 std::unique_ptr<N> AutoBalancedTree<N>::PivotHigher(std::unique_ptr<N>& node) {
   if (auto& lower = TreeNodeOperations<N>::GetLowerNode(*node)) {
     if (GetBalance(lower.get()) > 0) {
-      auto discard = TreeNodeOperations<N>::SetLowerNode(*node, PivotLower(lower));
-      assert(!discard);
+      ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*node, PivotLower(lower)));
     }
   }
   // NOTE: `lower` might be different than above.
   if (std::unique_ptr<N> lower = TreeNodeOperations<N>::SetLowerNode(*node, nullptr)) {
-    auto discard1 = TreeNodeOperations<N>::SetLowerNode(*node, TreeNodeOperations<N>::SetHigherNode(*lower, nullptr));
-    assert(!discard1);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*node, TreeNodeOperations<N>::SetHigherNode(*lower, nullptr)));
     TreeNodeOperations<N>::UpdateNode(*node);
-    auto discard2 = TreeNodeOperations<N>::SetHigherNode(*lower, std::move(node));
-    assert(!discard2);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*lower, std::move(node)));
     TreeNodeOperations<N>::UpdateNode(*lower);
     return lower;
   } else {
@@ -271,17 +272,14 @@ template<class N>
 std::unique_ptr<N> AutoBalancedTree<N>::PivotLower(std::unique_ptr<N>& node) {
   if (auto& higher = TreeNodeOperations<N>::GetHigherNode(*node)) {
     if (GetBalance(higher.get()) < 0) {
-      auto discard = TreeNodeOperations<N>::SetHigherNode(*node, PivotHigher(higher));
-      assert(!discard);
+      ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*node, PivotHigher(higher)));
     }
   }
   // NOTE: `higher` might be different than above.
   if (std::unique_ptr<N> higher = TreeNodeOperations<N>::SetHigherNode(*node, nullptr)) {
-    auto discard1 = TreeNodeOperations<N>::SetHigherNode(*node, TreeNodeOperations<N>::SetLowerNode(*higher, nullptr));
-    assert(!discard1);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*node, TreeNodeOperations<N>::SetLowerNode(*higher, nullptr)));
     TreeNodeOperations<N>::UpdateNode(*node);
-    auto discard2 = TreeNodeOperations<N>::SetLowerNode(*higher, std::move(node));
-    assert(!discard2);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*higher, std::move(node)));
     TreeNodeOperations<N>::UpdateNode(*higher);
     return higher;
   } else {
@@ -302,10 +300,8 @@ std::unique_ptr<N> AutoBalancedTree<N>::Remove(std::unique_ptr<N>& node) {
     new_lower = TreeNodeOperations<N>::SetLowerNode(*node, nullptr);
   }
   if (replacement) {
-    auto discard1 = TreeNodeOperations<N>::SetHigherNode(*replacement, std::move(new_higher));
-    assert(!discard1);
-    auto discard2 = TreeNodeOperations<N>::SetLowerNode(*replacement, std::move(new_lower));
-    assert(!discard2);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*replacement, std::move(new_higher)));
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*replacement, std::move(new_lower)));
     TreeNodeOperations<N>::UpdateNode(*replacement);
   }
   node.reset();
@@ -319,8 +315,7 @@ std::unique_ptr<N> AutoBalancedTree<N>::RemoveHighest(std::unique_ptr<N>& node, 
   } else if (auto& higher = TreeNodeOperations<N>::GetHigherNode(*node)) {
     std::unique_ptr<N> new_root2;
     std::unique_ptr<N> removed = RemoveHighest(higher, new_root2);
-    auto discard = TreeNodeOperations<N>::SetHigherNode(*node, std::move(new_root2));
-    assert(!discard);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*node, std::move(new_root2)));
     new_root = Rebalance(node);
     return removed;
   } else {
@@ -336,8 +331,7 @@ std::unique_ptr<N> AutoBalancedTree<N>::RemoveLowest(std::unique_ptr<N>& node, s
   } else if (auto& lower = TreeNodeOperations<N>::GetLowerNode(*node)) {
     std::unique_ptr<N> new_root2;
     std::unique_ptr<N> removed = RemoveLowest(lower, new_root2);
-    auto discard = TreeNodeOperations<N>::SetLowerNode(*node, std::move(new_root2));
-    assert(!discard);
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*node, std::move(new_root2)));
     new_root = Rebalance(node);
     return removed;
   } else {
@@ -345,6 +339,8 @@ std::unique_ptr<N> AutoBalancedTree<N>::RemoveLowest(std::unique_ptr<N>& node, s
     return std::move(node);
   }
 }
+
+#undef NDEBUG
 
 }  // namespace cat_dist
 
