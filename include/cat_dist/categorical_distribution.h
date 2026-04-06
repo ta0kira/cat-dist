@@ -36,10 +36,6 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   using V = W;
 
   explicit CategoricalNode(C category) : category_(std::move(category)) {}
-  CategoricalNode(const CategoricalNode& other) :
-    category_(other.category_),
-    higher_child_(other.higher_child_ ? TreeNodeAllocation<CategoricalNode>::CopyNode(*other.higher_child_) : nullptr),
-    lower_child_(other.lower_child_ ? TreeNodeAllocation<CategoricalNode>::CopyNode(*other.lower_child_) : nullptr) {}
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : W(); }

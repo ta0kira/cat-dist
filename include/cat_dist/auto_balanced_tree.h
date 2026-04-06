@@ -17,9 +17,6 @@ class AutoBalancedTree {
   using V = typename TreeNodeOperations<N>::V;
 
   AutoBalancedTree() = default;
-  AutoBalancedTree(const AutoBalancedTree& other);
-  AutoBalancedTree& operator=(const AutoBalancedTree& other);
-  ~AutoBalancedTree();
 
   N* root_node() { return root_node_.get(); }
   const N* root_node() const { return root_node_.get(); }
@@ -35,8 +32,6 @@ class AutoBalancedTree {
   bool ValidateCount(std::ostream* error_log) const;
 
  private:
-  void ClearRoot();
-
   static int GetBalance(const N* node);
   static bool CheckBalance(const N* node, std::ostream* error_log);
   static bool CheckOrder(const N* node, std::ostream* error_log);
@@ -64,25 +59,6 @@ namespace cat_dist {
     const auto discarded_result = stmt; \
     assert(!discarded_result); \
   } while (0)
-
-template<class N>
-AutoBalancedTree<N>::AutoBalancedTree(const AutoBalancedTree& other) {
-  root_node_ = other.root_node_ ? TreeNodeAllocation<N>::CopyNode(*other.root_node_) : nullptr;
-}
-
-template<class N>
-AutoBalancedTree<N>& AutoBalancedTree<N>::operator=(const AutoBalancedTree& other) {
-  if (*other != this) {
-    ClearRoot();
-    root_node_ = other.root_node_ ? TreeNodeAllocation<N>::CopyNode(*other.root_node_) : nullptr;
-  }
-  return *this;
-}
-
-template<class N>
-AutoBalancedTree<N>::~AutoBalancedTree() {
-  ClearRoot();
-}
 
 template<class N>
 const N* AutoBalancedTree<N>::Get(const K& key) const {
@@ -135,11 +111,6 @@ bool AutoBalancedTree<N>::ValidateCount(std::ostream* error_log) const {
 template<class N>
 bool AutoBalancedTree<N>::CheckOrder(std::ostream* error_log) const {
   return CheckOrder(root_node_.get(), error_log);
-}
-
-template<class N>
-void AutoBalancedTree<N>::ClearRoot() {
-  root_node_ = nullptr;
 }
 
 template<class N>
@@ -216,7 +187,7 @@ int AutoBalancedTree<N>::Exchange(std::unique_ptr<N>& node, const K& key, const 
   if (!node) {
     if (value) {
       size_change = 1;
-      new_root = TreeNodeAllocation<N>::NewNode(key);
+      new_root = TreeNodeOperations<N>::NewNode(key);
       TreeNodeOperations<N>::SetValue(*new_root, *value);
       TreeNodeOperations<N>::UpdateNode(*new_root);
     }

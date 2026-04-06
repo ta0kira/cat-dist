@@ -6,17 +6,11 @@
 namespace cat_dist {
 
 template<class N>
-struct TreeNodeAllocation {
-  using K = typename N::K;
-
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(K key) { return std::make_unique<N>(std::move(key)); }
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> CopyNode(const N& node) { return std::make_unique<N>(node); }
-};
-
-template<class N>
 struct TreeNodeOperations {
   using K = typename N::K;
   using V = typename N::V;
+
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(K key) { return std::make_unique<N>(std::move(key)); }
 
   static const std::unique_ptr<N>& GetHigherNode(const N& node) { return node.GetHigherNode(); }
   static const std::unique_ptr<N>& GetLowerNode(const N& node) { return node.GetLowerNode(); }
