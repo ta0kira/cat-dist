@@ -1,8 +1,9 @@
 #ifndef CAT_DIST_CATEGORICAL_DISTRIBUTION_H_
 #define CAT_DIST_CATEGORICAL_DISTRIBUTION_H_
 
-#include <optional>
+#include <functional>
 #include <memory>
+#include <optional>
 
 #include "auto_balanced_tree.h"
 #include "node_traits.h"
@@ -19,6 +20,11 @@ class CategoricalDistribution {
   const std::optional<C> LocateByWeight(const W& weight) const;
   const std::optional<C> LocateByWeight(const W& weight, const W& adjust);
 
+#ifdef CAT_DIST_TESTING
+  struct TestVisitor;
+  friend struct TestVisitor;
+#endif  // CAT_DIST_TESTING
+
  private:
   class CategoricalNode;
 
@@ -28,6 +34,15 @@ class CategoricalDistribution {
 }  // namespace cat_dist
 
 namespace cat_dist {
+
+#ifdef CAT_DIST_TESTING
+template<class C, class W>
+struct CategoricalDistribution<C, W>::TestVisitor {
+  static void ValidateTree(const CategoricalDistribution& dist, const std::function<void(const AutoBalancedTree<CategoricalNode>&)>& check) {
+    check(dist.tree_);
+  }
+};
+#endif  // CAT_DIST_TESTING
 
 template<class C, class W>
 class CategoricalDistribution<C, W>::CategoricalNode {

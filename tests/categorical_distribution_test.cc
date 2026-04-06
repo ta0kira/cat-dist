@@ -78,4 +78,10 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(distribution.GetTotalWeight() == 5);
     CHECK(distribution.GetUniqueCount() == 2);
   }
+
+  TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {
+    CHECK_THAT(tree, IsBalanced());
+    CHECK_THAT(tree, IsOrderedCorrectly());
+    CHECK_THAT(tree, HasCorrectCount());
+  });
 }

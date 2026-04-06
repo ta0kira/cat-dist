@@ -19,6 +19,7 @@ add_executable(tests
 target_include_directories(tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_compile_options(tests PRIVATE -Wall -g -Werror)
+target_compile_definitions(tests PRIVATE -DCAT_DIST_TESTING)
 
 if(VERBOSE_TESTS)
   target_compile_definitions(tests PRIVATE -DVERBOSE_TESTS)
