@@ -2,12 +2,23 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <vector>
+
 #include "helpers.h"
 
 using namespace cat_dist;
 using namespace cat_dist::tests;
 
+namespace {
+
 using TestDistribution = CategoricalDistribution<std::string, int>;
+
+template<class C>
+std::vector<typename C::value_type> ToVector(const C& container) {
+  return std::vector<typename C::value_type>(container.begin(), container.end());
+}
+
+}  // namespace
 
 TEST_CASE("CategoricalDistribution") {
   TestDistribution distribution;
@@ -44,6 +55,7 @@ TEST_CASE("CategoricalDistribution") {
     distribution.SetWeight("5", 6);
     CHECK(distribution.GetTotalWeight() == 37);
     CHECK(distribution.GetUniqueCount() == 5);
+    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "1", "2", "3", "4", "5" });
 
     distribution.SetWeight("3", 7);
     distribution.SetWeight("4", 0);
@@ -78,6 +90,7 @@ TEST_CASE("CategoricalDistribution") {
     CHECK_THAT(distribution.LocateByWeight(0, -1), OptionalMatches("2"));
     CHECK(distribution.GetTotalWeight() == 5);
     CHECK(distribution.GetUniqueCount() == 2);
+    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "2", "3" });
   }
 
   TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {

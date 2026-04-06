@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <set>
 
 #include "auto_balanced_tree.h"
 #include "node_traits.h"
@@ -15,6 +16,7 @@ class CategoricalDistribution {
  public:
   W GetTotalWeight() const;
   int GetUniqueCount() const;
+  std::set<C> GetUniqueCategories() const;
   void SetWeight(const C& category, const W& weight);
   W GetWeight(const C& category) const;
   const std::optional<C> LocateByWeight(const W& weight) const;
@@ -54,6 +56,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   explicit CategoricalNode(C category) : category_(std::move(category)) {}
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
+  static void CollectCategories(const CategoricalNode* node, std::set<C>& output);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : ZERO; }
 
   const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
@@ -109,6 +112,15 @@ const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistri
 }
 
 template<class C, class W>
+void CategoricalDistribution<C, W>::CategoricalNode::CollectCategories(const CategoricalNode* node, std::set<C>& output) {
+  if (node) {
+    output.insert(node->GetKey());
+    CollectCategories(node->GetLowerNode().get(), output);
+    CollectCategories(node->GetHigherNode().get(), output);
+  }
+}
+
+template<class C, class W>
 void CategoricalDistribution<C, W>::CategoricalNode::UpdateNode() {
   const int higher_height = higher_child_ ? higher_child_->height_ : 0;
   const int lower_height = lower_child_ ? lower_child_->height_ : 0;
@@ -134,6 +146,13 @@ W CategoricalDistribution<C, W>::GetTotalWeight() const {
 template<class C, class W>
 int CategoricalDistribution<C, W>::GetUniqueCount() const {
   return tree_.node_count();
+}
+
+template<class C, class W>
+std::set<C> CategoricalDistribution<C, W>::GetUniqueCategories() const {
+  std::set<C> output;
+  CategoricalNode::CollectCategories(tree_.root_node(), output);
+  return output;
 }
 
 template<class C, class W>
