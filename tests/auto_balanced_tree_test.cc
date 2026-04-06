@@ -65,9 +65,9 @@ class TestNode {
     const int higher_height = higher_child_ ? higher_child_->height_ : 0;
     const int lower_height = lower_child_ ? lower_child_->height_ : 0;
     if (higher_height > lower_height) {
-      height_ = higher_height+1;
+      height_ = higher_height + 1;
     } else {
-      height_ = lower_height+1;
+      height_ = lower_height + 1;
     }
   }
 
@@ -99,13 +99,11 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("1", 1);
     tree.Set("3", 3);
     CHECK(tree.node_count() == 3);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "2",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({ .key = "3" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({.key = "3"}),
+                                 })));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -117,16 +115,14 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("2", 2);
     tree.Set("1", 1);
     CHECK(tree.node_count() == 4);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "3",
-        .lower = NewNode({
-          .key = "2",
-          .lower = NewNode({ .key = "1" }),
-        }),
-        .higher = NewNode({ .key = "4" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "3",
+                                     .lower = NewNode({
+                                         .key = "2",
+                                         .lower = NewNode({.key = "1"}),
+                                     }),
+                                     .higher = NewNode({.key = "4"}),
+                                 })));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -139,16 +135,14 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("3", 3);
     tree.Set("4", 4);
     CHECK(tree.node_count() == 4);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "2",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({
-          .key = "3",
-          .higher = NewNode({ .key = "4" }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({
+                                         .key = "3",
+                                         .higher = NewNode({.key = "4"}),
+                                     }),
+                                 })));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -161,16 +155,14 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("1", 1);
     tree.Set("2", 2);
     CHECK(tree.node_count() == 4);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "3",
-        .lower = NewNode({
-          .key = "1",
-          .higher = NewNode({ .key = "2" }),
-        }),
-        .higher = NewNode({ .key = "4" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "3",
+                                     .lower = NewNode({
+                                         .key = "1",
+                                         .higher = NewNode({.key = "2"}),
+                                     }),
+                                     .higher = NewNode({.key = "4"}),
+                                 })));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -183,16 +175,14 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("3", 3);
     CHECK(tree.node_count() == 4);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "2",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({
-          .key = "4",
-          .lower = NewNode({ .key = "3" }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({
+                                         .key = "4",
+                                         .lower = NewNode({.key = "3"}),
+                                     }),
+                                 })));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -242,24 +232,20 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("1", 1);
     tree.Set("3", 3);
     tree.Set("4", 4);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "2",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({
-          .key = "3",
-          .higher = NewNode({ .key = "4" }),
-        })
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({
+                                         .key = "3",
+                                         .higher = NewNode({.key = "4"}),
+                                     }),
+                                 })));
     tree.Unset("2");
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "3",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({ .key = "4" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "3",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({.key = "4"}),
+                                 })));
     CHECK(tree.node_count() == 3);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK(tree.Get("2") == nullptr);
@@ -272,24 +258,20 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("2", 2);
     tree.Set("4", 4);
     tree.Set("1", 1);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "3",
-        .lower = NewNode({
-          .key = "2",
-          .lower = NewNode({ .key = "1" }),
-         }),
-        .higher = NewNode({ .key = "4" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "3",
+                                     .lower = NewNode({
+                                         .key = "2",
+                                         .lower = NewNode({.key = "1"}),
+                                     }),
+                                     .higher = NewNode({.key = "4"}),
+                                 })));
     tree.Unset("3");
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "2",
-        .lower = NewNode({ .key = "1" }),
-        .higher = NewNode({ .key = "4" }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({.key = "4"}),
+                                 })));
     CHECK(tree.node_count() == 3);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -305,38 +287,34 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("6", 6);
     tree.Set("7", 7);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "3",
-        .lower = NewNode({
-          .key = "1",
-          .higher = NewNode({ .key = "2" }),
-        }),
-        .higher = NewNode({
-          .key = "5",
-          .lower = NewNode({ .key = "4" }),
-          .higher = NewNode({
-            .key = "6",
-            .higher = NewNode({ .key = "7" }),
-          }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "3",
+                                     .lower = NewNode({
+                                         .key = "1",
+                                         .higher = NewNode({.key = "2"}),
+                                     }),
+                                     .higher = NewNode({
+                                         .key = "5",
+                                         .lower = NewNode({.key = "4"}),
+                                         .higher = NewNode({
+                                             .key = "6",
+                                             .higher = NewNode({.key = "7"}),
+                                         }),
+                                     }),
+                                 })));
     tree.Unset("3");
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "4",
-        .lower = NewNode({
-          .key = "1",
-          .higher = NewNode({ .key = "2" }),
-        }),
-        .higher = NewNode({
-          .key = "6",
-          .lower = NewNode({ .key = "5" }),
-          .higher = NewNode({ .key = "7" }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "4",
+                                     .lower = NewNode({
+                                         .key = "1",
+                                         .higher = NewNode({.key = "2"}),
+                                     }),
+                                     .higher = NewNode({
+                                         .key = "6",
+                                         .lower = NewNode({.key = "5"}),
+                                         .higher = NewNode({.key = "7"}),
+                                     }),
+                                 })));
     CHECK(tree.node_count() == 6);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -355,38 +333,34 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("2", 2);
     tree.Set("1", 1);
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "5",
-        .lower = NewNode({
-          .key = "3",
-          .lower = NewNode({
-            .key = "2",
-            .lower = NewNode({ .key = "1" }),
-          }),
-          .higher = NewNode({ .key = "4" }),
-        }),
-        .higher = NewNode({
-          .key = "7",
-          .lower = NewNode({ .key = "6" }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "5",
+                                     .lower = NewNode({
+                                         .key = "3",
+                                         .lower = NewNode({
+                                             .key = "2",
+                                             .lower = NewNode({.key = "1"}),
+                                         }),
+                                         .higher = NewNode({.key = "4"}),
+                                     }),
+                                     .higher = NewNode({
+                                         .key = "7",
+                                         .lower = NewNode({.key = "6"}),
+                                     }),
+                                 })));
     tree.Unset("5");
-    CHECK_THAT(tree.root_node(), MatchesStructure(
-      NewNode({
-        .key = "4",
-        .lower = NewNode({
-          .key = "2",
-          .lower = NewNode({ .key = "1" }),
-          .higher = NewNode({ .key = "3" }),
-        }),
-        .higher = NewNode({
-          .key = "7",
-          .lower = NewNode({ .key = "6" }),
-        }),
-      })
-    ));
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "4",
+                                     .lower = NewNode({
+                                         .key = "2",
+                                         .lower = NewNode({.key = "1"}),
+                                         .higher = NewNode({.key = "3"}),
+                                     }),
+                                     .higher = NewNode({
+                                         .key = "7",
+                                         .lower = NewNode({.key = "6"}),
+                                     }),
+                                 })));
     CHECK(tree.node_count() == 6);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -404,11 +378,11 @@ TEST_CASE("AutoBalancedTree") {
 
     for (int i = 0; i < count; ++i) {
       const std::string error_note = QuickFormat() << "[insert iteration " << i << "] ";
-      const int value = (i*perm+offset)%count;
+      const int value = (i * perm + offset) % count;
       const std::string key = ZeroPad(value, 3);
       tree.Set(key, value);
       REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
-      REQUIRE(tree.node_count() == i+1);
+      REQUIRE(tree.node_count() == i + 1);
       REQUIRE_THAT(tree, IsBalanced(error_note));
       REQUIRE_THAT(tree, IsOrderedCorrectly(error_note));
       REQUIRE_THAT(tree, HasCorrectCount(error_note));
@@ -421,14 +395,14 @@ TEST_CASE("AutoBalancedTree") {
 
     for (int i = 0; i < count; ++i) {
       const std::string error_note = QuickFormat() << "[check iteration " << i << "] ";
-      const int value = (i*perm+offset)%count;
+      const int value = (i * perm + offset) % count;
       const std::string key = ZeroPad(value, 3);
       REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
     }
 
     for (int i = 0; i < count; ++i) {
       const std::string error_note = QuickFormat() << "[remove iteration " << i << "] ";
-      const int value = (i*perm+offset)%count;
+      const int value = (i * perm + offset) % count;
       const std::string key = ZeroPad(value, 3);
       tree.Unset(key);
 #ifdef VERBOSE_TESTS
@@ -436,10 +410,11 @@ TEST_CASE("AutoBalancedTree") {
       DescribeTree(tree, std::cerr);
 #endif  // VERBOSE_TESTS
       REQUIRE(tree.Get(key) == nullptr);
-      REQUIRE(tree.node_count() == count-i-1);
-      for (int j = i+1; j < count; ++j) {
-        const std::string error_note2 = QuickFormat() << "[remove iteration " << i << ":" << j << "] ";
-        const int value2 = (j*perm+offset)%count;
+      REQUIRE(tree.node_count() == count - i - 1);
+      for (int j = i + 1; j < count; ++j) {
+        const std::string error_note2 = QuickFormat()
+                                        << "[remove iteration " << i << ":" << j << "] ";
+        const int value2 = (j * perm + offset) % count;
         const std::string key2 = ZeroPad(value2, 3);
         REQUIRE_THAT(tree.Get(key2), NodeValueMatches(value2, error_note2));
       }
@@ -456,7 +431,8 @@ TEST_CASE("AutoBalancedTree") {
 
 namespace {
 
-__attribute__((unused)) void DescribeNode(const TestNode* node, std::ostream& output, const std::string& prefix) {
+__attribute__((unused)) void DescribeNode(const TestNode* node, std::ostream& output,
+                                          const std::string& prefix) {
   if (node) {
     output << node->GetKey() << std::endl;
     if (const auto& lower = node->GetLowerNode()) {

@@ -45,9 +45,10 @@ int main() {
   }
   std::cout << std::endl;
 
-  // Destructively generate the permutation. (Make a copy first with `DeepCopy()` if needed.)
+  // Destructively generate the permutation. (Make a copy first with
+  // `DeepCopy()` if needed.)
   while (categories.GetTotalWeight() > 0) {
-    const int target_weight = categories.GetTotalWeight()*distribution(generator);
+    const int target_weight = categories.GetTotalWeight() * distribution(generator);
     // Use a -1 adjustment to decrement the weight of the chosen category.
     const std::optional<std::string> chosen = categories.LocateByWeight(target_weight, -1);
     // Should never be empty if `target_weight` is in the valid range.

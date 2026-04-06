@@ -18,9 +18,9 @@ limitations under the License.
 
 #include "cat_dist/categorical_distribution.h"
 
-#include <catch2/catch_test_macros.hpp>
-
 #include <vector>
+
+#include <catch2/catch_test_macros.hpp>
 
 #include "helpers.h"
 
@@ -31,7 +31,7 @@ namespace {
 
 using TestDistribution = CategoricalDistribution<std::string, int>;
 
-template<class C>
+template <class C>
 std::vector<typename C::value_type> ToVector(const C& container) {
   return std::vector<typename C::value_type>(container.begin(), container.end());
 }
@@ -85,7 +85,7 @@ TEST_CASE("CategoricalDistribution") {
     distribution.SetWeight("1", 5);
     distribution.SetWeight("2", 15);
     distribution.SetWeight("3", 2);
-    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "1", "2", "3" });
+    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{"1", "2", "3"});
   }
 
   SECTION("export") {
@@ -93,7 +93,7 @@ TEST_CASE("CategoricalDistribution") {
     distribution.SetWeight("2", 15);
     distribution.SetWeight("3", 2);
     std::map<std::string, int> exported = distribution.ExportWeights();
-    CHECK((signed) exported.size() == distribution.GetUniqueCount());
+    CHECK((signed)exported.size() == distribution.GetUniqueCount());
     CHECK(exported["1"] == 5);
     CHECK(exported["2"] == 15);
     CHECK(exported["3"] == 2);
@@ -158,7 +158,7 @@ TEST_CASE("CategoricalDistribution") {
     const int offset = 12;
 
     for (int i = 0; i < count; ++i) {
-      const int value = (i*perm+offset)%count;
+      const int value = (i * perm + offset) % count;
       const std::string key = std::to_string(value);
       distribution.SetWeight(key, value);
       REQUIRE(distribution.GetWeight(key) == value);
@@ -168,16 +168,16 @@ TEST_CASE("CategoricalDistribution") {
         CHECK_THAT(tree, HasCorrectCount());
       });
     }
-    REQUIRE(distribution.GetTotalWeight() == count*(count-1)/2);
-    REQUIRE(distribution.GetUniqueCount() == count-1);
+    REQUIRE(distribution.GetTotalWeight() == count * (count - 1) / 2);
+    REQUIRE(distribution.GetUniqueCount() == count - 1);
 
     for (int i = 0; i < count; ++i) {
-      const int value = (i*perm+offset)%count;
+      const int value = (i * perm + offset) % count;
       const std::string key = std::to_string(value);
       distribution.SetWeight(key, 0);
       REQUIRE(distribution.GetWeight(key) == 0);
-      for (int j = i+1; j < count; ++j) {
-        const int value2 = (j*perm+offset)%count;
+      for (int j = i + 1; j < count; ++j) {
+        const int value2 = (j * perm + offset) % count;
         const std::string key2 = std::to_string(value2);
         REQUIRE(distribution.GetWeight(key2) == value2);
       }

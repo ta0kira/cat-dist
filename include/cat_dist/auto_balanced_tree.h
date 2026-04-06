@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace cat_dist {
 
-template<class N>
+template <class N>
 class AutoBalancedTree {
  public:
   using K = typename TreeNodeOperations<N>::K;
@@ -53,7 +53,8 @@ class AutoBalancedTree {
   bool ValidateCount(std::ostream* error_log) const;
 
  private:
-  AutoBalancedTree(int node_count, NP root_node) : node_count_(node_count), root_node_(std::move(root_node)) {}
+  AutoBalancedTree(int node_count, NP root_node)
+      : node_count_(node_count), root_node_(std::move(root_node)) {}
 
   static int GetBalance(const N* node);
   static bool CheckBalance(const N* node, std::ostream* error_log);
@@ -77,53 +78,54 @@ class AutoBalancedTree {
 
 namespace cat_dist {
 
-#define ASSERT_NULL_RETURN(stmt) \
-  do { \
+#define ASSERT_NULL_RETURN(stmt)        \
+  do {                                  \
     const auto discarded_result = stmt; \
-    assert(!discarded_result); \
+    assert(!discarded_result);          \
   } while (0)
 
-template<class N>
+template <class N>
 AutoBalancedTree<N> AutoBalancedTree<N>::DeepCopy() const {
-  return AutoBalancedTree<N>(node_count_, root_node_ ? TreeNodeOperations<N>::CopyNode(*root_node_) : nullptr);
+  return AutoBalancedTree<N>(node_count_,
+                             root_node_ ? TreeNodeOperations<N>::CopyNode(*root_node_) : nullptr);
 }
 
-template<class N>
+template <class N>
 void AutoBalancedTree<N>::ClearAll() {
   node_count_ = 0;
   root_node_.reset();
 }
 
-template<class N>
+template <class N>
 const N* AutoBalancedTree<N>::Get(const K& key) const {
   return Find(root_node_.get(), key);
 }
 
-template<class N>
+template <class N>
 N* AutoBalancedTree<N>::Get(const K& key) {
   return Find(root_node_.get(), key);
 }
 
-template<class N>
+template <class N>
 const void AutoBalancedTree<N>::Set(const K& key, const V& value) {
   NP new_root;
   node_count_ += Exchange(root_node_, key, &value, new_root);
   root_node_ = std::move(new_root);
 }
 
-template<class N>
+template <class N>
 const void AutoBalancedTree<N>::Unset(const K& key) {
   NP new_root;
   node_count_ += Exchange(root_node_, key, nullptr, new_root);
   root_node_ = std::move(new_root);
 }
 
-template<class N>
+template <class N>
 bool AutoBalancedTree<N>::CheckBalance(std::ostream* error_log) const {
   return CheckBalance(root_node_.get(), error_log);
 }
 
-template<class N>
+template <class N>
 bool AutoBalancedTree<N>::ValidateCount(std::ostream* error_log) const {
   const int actual_count = CountNodes(root_node_.get());
   if (actual_count != node_count_) {
@@ -136,12 +138,12 @@ bool AutoBalancedTree<N>::ValidateCount(std::ostream* error_log) const {
   }
 }
 
-template<class N>
+template <class N>
 bool AutoBalancedTree<N>::CheckOrder(std::ostream* error_log) const {
   return CheckOrder(root_node_.get(), error_log);
 }
 
-template<class N>
+template <class N>
 int AutoBalancedTree<N>::GetBalance(const N* node) {
   int balance = 0;
   if (node) {
@@ -155,12 +157,13 @@ int AutoBalancedTree<N>::GetBalance(const N* node) {
   return balance;
 }
 
-template<class N>
+template <class N>
 bool AutoBalancedTree<N>::CheckBalance(const N* node, std::ostream* error_log) {
   const int balance = GetBalance(node);
   bool is_balanced = std::abs(balance) <= 1;
   if (!is_balanced && error_log) {
-    *error_log << "node " << TreeNodeOperations<N>::GetKey(*node) << " has balance " << balance << std::endl;
+    *error_log << "node " << TreeNodeOperations<N>::GetKey(*node) << " has balance " << balance
+               << std::endl;
   }
   if (node) {
     is_balanced &= CheckBalance(TreeNodeOperations<N>::GetHigherNode(*node).get(), error_log);
@@ -169,7 +172,7 @@ bool AutoBalancedTree<N>::CheckBalance(const N* node, std::ostream* error_log) {
   return is_balanced;
 }
 
-template<class N>
+template <class N>
 bool AutoBalancedTree<N>::CheckOrder(const N* node, std::ostream* error_log) {
   bool is_ordered = true;
   if (node) {
@@ -198,7 +201,7 @@ bool AutoBalancedTree<N>::CheckOrder(const N* node, std::ostream* error_log) {
   return is_ordered;
 }
 
-template<class N>
+template <class N>
 int AutoBalancedTree<N>::CountNodes(const N* node) {
   int count = 0;
   if (node) {
@@ -209,7 +212,7 @@ int AutoBalancedTree<N>::CountNodes(const N* node) {
   return count;
 }
 
-template<class N>
+template <class N>
 int AutoBalancedTree<N>::Exchange(NP& node, const K& key, const V* value, NP& new_root) {
   int size_change = 0;
   if (!node) {
@@ -240,7 +243,7 @@ int AutoBalancedTree<N>::Exchange(NP& node, const K& key, const V* value, NP& ne
   return size_change;
 }
 
-template<class N>
+template <class N>
 const N* AutoBalancedTree<N>::Find(const N* node, const K& key) {
   if (node) {
     if (TreeNodeOperations<N>::KeyLessThan(key, TreeNodeOperations<N>::GetKey(*node))) {
@@ -254,7 +257,7 @@ const N* AutoBalancedTree<N>::Find(const N* node, const K& key) {
   return nullptr;
 }
 
-template<class N>
+template <class N>
 N* AutoBalancedTree<N>::Find(N* node, const K& key) {
   if (node) {
     if (TreeNodeOperations<N>::KeyLessThan(key, TreeNodeOperations<N>::GetKey(*node))) {
@@ -268,7 +271,7 @@ N* AutoBalancedTree<N>::Find(N* node, const K& key) {
   return nullptr;
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::Rebalance(NP& node) {
   if (node) {
     TreeNodeOperations<N>::UpdateNode(*node);
@@ -282,7 +285,7 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::Rebalance(NP& node) {
   return std::move(node);
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotHigher(NP& node) {
   if (auto& lower = TreeNodeOperations<N>::GetLowerNode(*node)) {
     if (GetBalance(lower.get()) > 0) {
@@ -291,7 +294,8 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotHigher(NP& node) {
   }
   // NOTE: `lower` might be different than above.
   if (NP lower = TreeNodeOperations<N>::SetLowerNode(*node, nullptr)) {
-    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*node, TreeNodeOperations<N>::SetHigherNode(*lower, nullptr)));
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(
+        *node, TreeNodeOperations<N>::SetHigherNode(*lower, nullptr)));
     TreeNodeOperations<N>::UpdateNode(*node);
     ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*lower, std::move(node)));
     TreeNodeOperations<N>::UpdateNode(*lower);
@@ -301,7 +305,7 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotHigher(NP& node) {
   }
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotLower(NP& node) {
   if (auto& higher = TreeNodeOperations<N>::GetHigherNode(*node)) {
     if (GetBalance(higher.get()) < 0) {
@@ -310,7 +314,8 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotLower(NP& node) {
   }
   // NOTE: `higher` might be different than above.
   if (NP higher = TreeNodeOperations<N>::SetHigherNode(*node, nullptr)) {
-    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(*node, TreeNodeOperations<N>::SetLowerNode(*higher, nullptr)));
+    ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetHigherNode(
+        *node, TreeNodeOperations<N>::SetLowerNode(*higher, nullptr)));
     TreeNodeOperations<N>::UpdateNode(*node);
     ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*higher, std::move(node)));
     TreeNodeOperations<N>::UpdateNode(*higher);
@@ -320,7 +325,7 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::PivotLower(NP& node) {
   }
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::Remove(NP& node) {
   NP replacement;
   NP new_higher;
@@ -343,7 +348,7 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::Remove(NP& node) {
   return replacement;
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::RemoveHighest(NP& node, NP& new_root) {
   if (!node) {
     return nullptr;
@@ -359,7 +364,7 @@ typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::RemoveHighest(NP& node, NP
   }
 }
 
-template<class N>
+template <class N>
 typename AutoBalancedTree<N>::NP AutoBalancedTree<N>::RemoveLowest(NP& node, NP& new_root) {
   if (!node) {
     return nullptr;

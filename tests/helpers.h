@@ -30,15 +30,13 @@ namespace cat_dist::tests {
 
 class QuickFormat {
  public:
-  template<class T>
+  template <class T>
   QuickFormat& operator<<(const T& value) {
     static_cast<std::ostream&>(output_) << value;
     return *this;
   }
 
-  operator std::string() const {
-    return output_.str();
-  }
+  operator std::string() const { return output_.str(); }
 
  private:
   std::ostringstream output_;
@@ -48,13 +46,13 @@ class IsBalanced : public Catch::Matchers::MatcherGenericBase {
  public:
   explicit IsBalanced(std::string note = "") : note_(std::move(note)) {}
 
-  template<class N>
+  template <class N>
   bool match(const AutoBalancedTree<N>& tree) const {
     return tree.CheckBalance(&output_);
   }
 
   std::string describe() const override {
-    return QuickFormat() << note_  << "should be balanced\n" << output_.str();
+    return QuickFormat() << note_ << "should be balanced\n" << output_.str();
   }
 
  private:
@@ -66,13 +64,13 @@ class IsOrderedCorrectly : public Catch::Matchers::MatcherGenericBase {
  public:
   explicit IsOrderedCorrectly(std::string note = "") : note_(std::move(note)) {}
 
-  template<class N>
+  template <class N>
   bool match(const AutoBalancedTree<N>& tree) const {
     return tree.CheckOrder(&output_);
   }
 
   std::string describe() const override {
-    return QuickFormat() << note_  << "should be ordered correctly\n" << output_.str();
+    return QuickFormat() << note_ << "should be ordered correctly\n" << output_.str();
   }
 
  private:
@@ -84,13 +82,13 @@ class HasCorrectCount : public Catch::Matchers::MatcherGenericBase {
  public:
   explicit HasCorrectCount(std::string note = "") : note_(std::move(note)) {}
 
-  template<class N>
+  template <class N>
   bool match(const AutoBalancedTree<N>& tree) const {
     return tree.ValidateCount(&output_);
   }
 
   std::string describe() const override {
-    return QuickFormat() << note_  << "should have correct node count\n" << output_.str();
+    return QuickFormat() << note_ << "should have correct node count\n" << output_.str();
   }
 
  private:
@@ -98,18 +96,19 @@ class HasCorrectCount : public Catch::Matchers::MatcherGenericBase {
   mutable std::ostringstream output_;
 };
 
-template<class T>
+template <class T>
 class CheckNodeValueMatches : public Catch::Matchers::MatcherGenericBase {
  public:
-  explicit CheckNodeValueMatches(const T& expected, std::string note = "") : note_(std::move(note)), expected_(expected) {}
+  explicit CheckNodeValueMatches(const T& expected, std::string note = "")
+      : note_(std::move(note)), expected_(expected) {}
 
-  template<class N>
+  template <class N>
   bool match(const N* node) const {
     return node ? (node->GetValue() == expected_) : false;
   }
 
   std::string describe() const override {
-    return QuickFormat() << note_  << "matches " << expected_;
+    return QuickFormat() << note_ << "matches " << expected_;
   }
 
  private:
@@ -117,28 +116,29 @@ class CheckNodeValueMatches : public Catch::Matchers::MatcherGenericBase {
   const T& expected_;
 };
 
-template<class T>
+template <class T>
 CheckNodeValueMatches<T> NodeValueMatches(const T& expected, std::string note = "") {
   return CheckNodeValueMatches<T>(expected, std::move(note));
 }
 
-template<class T>
+template <class T>
 class CheckOptionalMatches : public Catch::Matchers::MatcherGenericBase {
  public:
-  explicit CheckOptionalMatches(const T& expected, std::string note = "") : note_(std::move(note)), expected_(expected) {}
+  explicit CheckOptionalMatches(const T& expected, std::string note = "")
+      : note_(std::move(note)), expected_(expected) {}
 
-  template<class T2>
+  template <class T2>
   bool match(const T2* actual) const {
     return actual ? (*actual == expected_) : false;
   }
 
-  template<class T2>
+  template <class T2>
   bool match(const std::optional<T2>& actual) const {
     return actual ? (*actual == expected_) : false;
   }
 
   std::string describe() const override {
-    return QuickFormat() << note_  << "matches " << expected_;
+    return QuickFormat() << note_ << "matches " << expected_;
   }
 
  private:
@@ -146,34 +146,36 @@ class CheckOptionalMatches : public Catch::Matchers::MatcherGenericBase {
   const T& expected_;
 };
 
-template<class T>
+template <class T>
 CheckOptionalMatches<T> OptionalMatches(const T& expected, std::string note = "") {
   return CheckOptionalMatches<T>(expected, std::move(note));
 }
 
-template<class T>
+template <class T>
 struct MatcherNode {
   const T key;
   std::unique_ptr<const MatcherNode> lower;
   std::unique_ptr<const MatcherNode> higher;
 };
 
-template<class T>
+template <class T>
 class StructureMatcher : public Catch::Matchers::MatcherGenericBase {
  public:
-  explicit StructureMatcher(std::unique_ptr<const MatcherNode<T>> nodes = nullptr) : nodes_(std::move(nodes)) {}
+  explicit StructureMatcher(std::unique_ptr<const MatcherNode<T>> nodes = nullptr)
+      : nodes_(std::move(nodes)) {}
 
-  template<class N>
+  template <class N>
   bool match(const N* root_node) const {
     return RecursiveMatch(root_node, nodes_.get());
   }
 
   std::string describe() const override {
-    return QuickFormat() << "matches structure\n" << output_.str();;
+    return QuickFormat() << "matches structure\n" << output_.str();
+    ;
   }
 
  private:
-  template<class N>
+  template <class N>
   bool RecursiveMatch(const N* actual, const MatcherNode<T>* expected) const {
     if (!actual && !expected) {
       return true;
@@ -189,7 +191,8 @@ class StructureMatcher : public Catch::Matchers::MatcherGenericBase {
     bool matches = true;
     if (actual->GetKey() != expected->key) {
       matches = false;
-      output_ << "expected key " << expected->key << " but got key " << actual->GetKey() << std::endl;
+      output_ << "expected key " << expected->key << " but got key " << actual->GetKey()
+              << std::endl;
     }
     matches &= RecursiveMatch(actual->GetLowerNode().get(), expected->lower.get());
     matches &= RecursiveMatch(actual->GetHigherNode().get(), expected->higher.get());
@@ -200,7 +203,7 @@ class StructureMatcher : public Catch::Matchers::MatcherGenericBase {
   mutable std::ostringstream output_;
 };
 
-template<class T>
+template <class T>
 StructureMatcher<T> MatchesStructure(std::unique_ptr<const MatcherNode<T>> expected = nullptr) {
   return StructureMatcher<T>(std::move(expected));
 }

@@ -31,12 +31,13 @@ int main() {
 
   cat_dist::CategoricalDistribution<std::string, double> categories;
 
-  // Relative weights of each category. The scale doesn't matter for this example.
+  // Relative weights of each category. The scale doesn't matter for this
+  // example.
   categories.SetWeight("0", 10.1);
   categories.SetWeight("1", 2.3);
 
   for (int i = 0; i < 32; ++i) {
-    const int target_weight = categories.GetTotalWeight()*distribution(generator);
+    const int target_weight = categories.GetTotalWeight() * distribution(generator);
     const std::optional<std::string> chosen = categories.LocateByWeight(target_weight);
     // Should never be empty if `target_weight` is in the valid range.
     assert(chosen);

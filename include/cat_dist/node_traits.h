@@ -23,13 +23,15 @@ limitations under the License.
 
 namespace cat_dist {
 
-template<class N>
+template <class N>
 struct TreeNodeOperations {
   using K = typename N::K;
   using V = typename N::V;
   using NP = std::unique_ptr<N>;
 
-  static __attribute__((warn_unused_result)) NP NewNode(const K& key, const V& value) { return std::make_unique<N>(key, value); }
+  static __attribute__((warn_unused_result)) NP NewNode(const K& key, const V& value) {
+    return std::make_unique<N>(key, value);
+  }
   static __attribute__((warn_unused_result)) NP CopyNode(const N& node) { return node.CopyNode(); }
 
   static const NP& GetHigherNode(const N& node) { return node.GetHigherNode(); }
@@ -44,8 +46,12 @@ struct TreeNodeOperations {
   static NP& GetLowerNode(N& node) { return node.GetLowerNode(); }
   static V& GetValue(N& node) { return node.GetValue(); }
 
-  static __attribute__((warn_unused_result)) NP SetHigherNode(N& node, NP child) { return node.SetHigherNode(std::move(child)); }
-  static __attribute__((warn_unused_result)) NP SetLowerNode(N& node, NP child) { return node.SetLowerNode(std::move(child)); }
+  static __attribute__((warn_unused_result)) NP SetHigherNode(N& node, NP child) {
+    return node.SetHigherNode(std::move(child));
+  }
+  static __attribute__((warn_unused_result)) NP SetLowerNode(N& node, NP child) {
+    return node.SetLowerNode(std::move(child));
+  }
   static void SetValue(N& node, V value) { node.SetValue(std::move(value)); }
   static void UpdateNode(N& node) { node.UpdateNode(); }
 };

@@ -30,7 +30,7 @@ limitations under the License.
 
 namespace cat_dist {
 
-template<class C, class W = int>
+template <class C, class W = int>
 class CategoricalDistribution {
  public:
   CategoricalDistribution() = default;
@@ -56,7 +56,8 @@ class CategoricalDistribution {
   static constexpr W kZero{};
   class CategoricalNode;
 
-  explicit CategoricalDistribution(AutoBalancedTree<CategoricalNode> tree) : tree_(std::move(tree)) {}
+  explicit CategoricalDistribution(AutoBalancedTree<CategoricalNode> tree)
+      : tree_(std::move(tree)) {}
 
   AutoBalancedTree<CategoricalNode> tree_;
 };
@@ -66,26 +67,30 @@ class CategoricalDistribution {
 namespace cat_dist {
 
 #ifdef CAT_DIST_TESTING
-template<class C, class W>
+template <class C, class W>
 struct CategoricalDistribution<C, W>::TestVisitor {
-  static void ValidateTree(const CategoricalDistribution& dist, const std::function<void(const AutoBalancedTree<CategoricalNode>&)>& check) {
+  static void ValidateTree(
+      const CategoricalDistribution& dist,
+      const std::function<void(const AutoBalancedTree<CategoricalNode>&)>& check) {
     check(dist.tree_);
   }
 };
 #endif  // CAT_DIST_TESTING
 
-template<class C, class W>
+template <class C, class W>
 class CategoricalDistribution<C, W>::CategoricalNode {
  public:
   using K = C;
   using V = W;
   using PN = std::unique_ptr<CategoricalNode>;
 
-  CategoricalNode(C category, W weight) : category_(std::move(category)), size_(std::move(weight)) {}
+  CategoricalNode(C category, W weight)
+      : category_(std::move(category)), size_(std::move(weight)) {}
   PN CopyNode() const;
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
-  static void TraversePreorder(const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function);
+  static void TraversePreorder(const CategoricalNode* node,
+                               const std::function<void(const CategoricalNode&)>& function);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : kZero; }
 
   const PN& GetHigherNode() const { return higher_child_; }
@@ -114,14 +119,15 @@ class CategoricalDistribution<C, W>::CategoricalNode {
  private:
   int height_ = 1;
   const C category_;
-  W size_ {};
-  W total_ {};
+  W size_{};
+  W total_{};
   PN higher_child_;
   PN lower_child_;
 };
 
-template<class C, class W>
-std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode> CategoricalDistribution<C, W>::CategoricalNode::CopyNode() const {
+template <class C, class W>
+std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode>
+CategoricalDistribution<C, W>::CategoricalNode::CopyNode() const {
   PN new_node = std::make_unique<CategoricalNode>(category_, size_);
   if (higher_child_) {
     new_node->lower_child_ = lower_child_->CopyNode();
@@ -133,8 +139,10 @@ std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode> Categor
   return new_node;
 }
 
-template<class C, class W>
-const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, W weight) {
+template <class C, class W>
+const typename CategoricalDistribution<C, W>::CategoricalNode*
+CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node,
+                                                               W weight) {
   if (node && weight >= kZero && weight < node->total_) {
     if (node->lower_child_) {
       if (weight < node->lower_child_->total_) {
@@ -153,8 +161,9 @@ const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistri
   return nullptr;
 }
 
-template<class C, class W>
-void CategoricalDistribution<C, W>::CategoricalNode::TraversePreorder(const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function) {
+template <class C, class W>
+void CategoricalDistribution<C, W>::CategoricalNode::TraversePreorder(
+    const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function) {
   if (node) {
     function(*node);
     TraversePreorder(node->GetLowerNode().get(), function);
@@ -162,14 +171,14 @@ void CategoricalDistribution<C, W>::CategoricalNode::TraversePreorder(const Cate
   }
 }
 
-template<class C, class W>
+template <class C, class W>
 void CategoricalDistribution<C, W>::CategoricalNode::UpdateNode() {
   const int higher_height = higher_child_ ? higher_child_->height_ : 0;
   const int lower_height = lower_child_ ? lower_child_->height_ : 0;
   if (higher_height > lower_height) {
-    height_ = higher_height+1;
+    height_ = higher_height + 1;
   } else {
-    height_ = lower_height+1;
+    height_ = lower_height + 1;
   }
   total_ = size_;
   if (higher_child_) {
@@ -180,36 +189,35 @@ void CategoricalDistribution<C, W>::CategoricalNode::UpdateNode() {
   }
 }
 
-template<class C, class W>
+template <class C, class W>
 CategoricalDistribution<C, W> CategoricalDistribution<C, W>::DeepCopy() const {
   return CategoricalDistribution(tree_.DeepCopy());
 }
 
-template<class C, class W>
+template <class C, class W>
 void CategoricalDistribution<C, W>::ClearAll() {
   tree_.ClearAll();
 }
 
-template<class C, class W>
+template <class C, class W>
 W CategoricalDistribution<C, W>::GetTotalWeight() const {
   return CategoricalNode::GetTotalWeight(tree_.root_node());
 }
 
-template<class C, class W>
+template <class C, class W>
 int CategoricalDistribution<C, W>::GetUniqueCount() const {
   return tree_.node_count();
 }
 
-template<class C, class W>
+template <class C, class W>
 std::set<C> CategoricalDistribution<C, W>::GetUniqueCategories() const {
   std::set<C> output;
-  CategoricalNode::TraversePreorder(tree_.root_node(), [&output](const auto& node) {
-    output.insert(node.GetKey());
-  });
+  CategoricalNode::TraversePreorder(tree_.root_node(),
+                                    [&output](const auto& node) { output.insert(node.GetKey()); });
   return output;
 }
 
-template<class C, class W>
+template <class C, class W>
 std::map<C, W> CategoricalDistribution<C, W>::ExportWeights() const {
   std::map<C, W> output;
   CategoricalNode::TraversePreorder(tree_.root_node(), [&output](const auto& node) {
@@ -218,7 +226,7 @@ std::map<C, W> CategoricalDistribution<C, W>::ExportWeights() const {
   return output;
 }
 
-template<class C, class W>
+template <class C, class W>
 void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight) {
   if (weight <= kZero) {
     tree_.Unset(category);
@@ -227,18 +235,18 @@ void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight
   }
 }
 
-template<class C, class W>
+template <class C, class W>
 void CategoricalDistribution<C, W>::AdjustWeight(const C& category, const W& adjust) {
   SetWeight(category, GetWeight(category) + adjust);
 }
 
-template<class C, class W>
+template <class C, class W>
 W CategoricalDistribution<C, W>::GetWeight(const C& category) const {
   const CategoricalNode* node = tree_.Get(category);
   return node ? node->GetValue() : kZero;
 }
 
-template<class C, class W>
+template <class C, class W>
 const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight) const {
   const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
   if (node) {
@@ -248,8 +256,9 @@ const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& we
   }
 }
 
-template<class C, class W>
-const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight, const W& adjust) {
+template <class C, class W>
+const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight,
+                                                                     const W& adjust) {
   const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
   if (node) {
     const auto key = node->GetKey();
