@@ -17,6 +17,6 @@ add_executable(tests
 
 target_include_directories(tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_compile_options(tests PRIVATE -Wall -g)
+target_compile_options(tests PRIVATE -Wall -g -Werror)
 
 target_link_libraries(tests cat_dist Catch2::Catch2WithMain)
