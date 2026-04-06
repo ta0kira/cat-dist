@@ -18,6 +18,7 @@ class AutoBalancedTree {
 
   AutoBalancedTree() = default;
   AutoBalancedTree DeepCopy() const;
+  void ClearAll();
 
   N* root_node() { return root_node_.get(); }
   const N* root_node() const { return root_node_.get(); }
@@ -66,6 +67,12 @@ namespace cat_dist {
 template<class N>
 AutoBalancedTree<N> AutoBalancedTree<N>::DeepCopy() const {
   return AutoBalancedTree<N>(node_count_, root_node_ ? TreeNodeOperations<N>::CopyNode(*root_node_) : nullptr);
+}
+
+template<class N>
+void AutoBalancedTree<N>::ClearAll() {
+  node_count_ = 0;
+  root_node_.reset();
 }
 
 template<class N>

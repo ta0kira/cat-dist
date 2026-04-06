@@ -16,6 +16,7 @@ class CategoricalDistribution {
  public:
   CategoricalDistribution() = default;
   CategoricalDistribution DeepCopy() const;
+  void ClearAll();
 
   W GetTotalWeight() const;
   int GetUniqueCount() const;
@@ -161,6 +162,11 @@ void CategoricalDistribution<C, W>::CategoricalNode::UpdateNode() {
 template<class C, class W>
 CategoricalDistribution<C, W> CategoricalDistribution<C, W>::DeepCopy() const {
   return CategoricalDistribution(tree_.DeepCopy());
+}
+
+template<class C, class W>
+void CategoricalDistribution<C, W>::ClearAll() {
+  tree_.ClearAll();
 }
 
 template<class C, class W>

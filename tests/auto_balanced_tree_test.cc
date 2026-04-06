@@ -168,6 +168,17 @@ TEST_CASE("AutoBalancedTree") {
     CHECK_THAT(tree.Get("4"), NodeValueMatches(4));
   }
 
+  SECTION("clear all") {
+    tree.Set("2", 2);
+    tree.Set("1", 1);
+    tree.Set("3", 3);
+    tree.ClearAll();
+    CHECK(tree.node_count() == 0);
+    CHECK(tree.Get("1") == nullptr);
+    CHECK(tree.Get("2") == nullptr);
+    CHECK(tree.Get("3") == nullptr);
+  }
+
   SECTION("removal of missing") {
     tree.Unset("1");
     CHECK(tree.node_count() == 0);

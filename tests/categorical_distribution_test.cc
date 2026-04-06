@@ -105,9 +105,7 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(distribution2.GetWeight("1") == 1);
     CHECK(distribution2.GetWeight("2") == 2);
     CHECK(distribution2.GetWeight("3") == 3);
-    distribution.SetWeight("1", 7);
-    distribution.SetWeight("2", 7);
-    distribution.SetWeight("3", 7);
+    distribution.ClearAll();
     CHECK(distribution2.GetWeight("1") == 1);
     CHECK(distribution2.GetWeight("2") == 2);
     CHECK(distribution2.GetWeight("3") == 3);
