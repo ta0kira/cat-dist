@@ -55,6 +55,7 @@ TEST_CASE("CategoricalDistribution") {
     distribution.SetWeight("1", 5);
     distribution.SetWeight("2", 5);
     distribution.SetWeight("3", 5);
+    CHECK(distribution.LocateByWeight(-1) == std::nullopt);
     CHECK_THAT(distribution.LocateByWeight(0), OptionalMatches("1"));
     CHECK_THAT(distribution.LocateByWeight(3), OptionalMatches("1"));
     CHECK_THAT(distribution.LocateByWeight(5), OptionalMatches("2"));

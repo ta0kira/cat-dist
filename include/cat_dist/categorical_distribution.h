@@ -26,6 +26,7 @@ class CategoricalDistribution {
 #endif  // CAT_DIST_TESTING
 
  private:
+  static constexpr W ZERO{};
   class CategoricalNode;
 
   AutoBalancedTree<CategoricalNode> tree_;
@@ -53,7 +54,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   explicit CategoricalNode(C category) : category_(std::move(category)) {}
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
-  static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : W(); }
+  static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : ZERO; }
 
   const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
   const std::unique_ptr<CategoricalNode>& GetLowerNode() const { return lower_child_; }
@@ -89,7 +90,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
 
 template<class C, class W>
 const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, W weight) {
-  if (node && weight < node->total_) {
+  if (node && weight >= ZERO && weight < node->total_) {
     if (node->lower_child_) {
       if (weight < node->lower_child_->total_) {
         return LocateByWeight(node->lower_child_.get(), weight);
@@ -137,7 +138,7 @@ int CategoricalDistribution<C, W>::GetUniqueCount() const {
 
 template<class C, class W>
 void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight) {
-  if (weight <= W()) {
+  if (weight <= ZERO) {
     tree_.Unset(category);
   } else {
     tree_.Set(category, weight);
@@ -147,7 +148,7 @@ void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight
 template<class C, class W>
 W CategoricalDistribution<C, W>::GetWeight(const C& category) const {
   const CategoricalNode* node = tree_.Get(category);
-  return node ? node->GetValue() : W();
+  return node ? node->GetValue() : ZERO;
 }
 
 template<class C, class W>
