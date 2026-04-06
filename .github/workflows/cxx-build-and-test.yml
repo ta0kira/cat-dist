@@ -15,7 +15,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y clang cmake
-      - name: Configure and Build
+      - name: Build Tests
         run: |
           mkdir -p tests/build && cd tests/build
           cmake ..
@@ -23,6 +23,13 @@ jobs:
       - name: Run Tests
         run: |
           tests/build/tests --reporter console --reporter JUnit::out=tests.xml
+      - name: Build and Test Examples
+        run: |
+          mkdir -p examples/build && cd examples/build
+          cmake ..
+          make -j$(getconf _NPROCESSORS_ONLN)
+          ./random_weighted
+          ./random_permutation
       - name: Create Test Report
         uses: dorny/test-reporter@v3
         if: success() || failure()
