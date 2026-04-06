@@ -143,7 +143,43 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(distribution2.GetWeight("1") == 1);
     CHECK(distribution2.GetWeight("2") == 2);
     CHECK(distribution2.GetWeight("3") == 3);
+  }
 
+  SECTION("structure test") {
+    const int count = 100;
+    const int perm = 47;
+    const int offset = 12;
+
+    for (int i = 0; i < count; ++i) {
+      const int value = (i*perm+offset)%count;
+      const std::string key = std::to_string(value);
+      distribution.SetWeight(key, value);
+      REQUIRE(distribution.GetWeight(key) == value);
+      TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {
+        CHECK_THAT(tree, IsBalanced());
+        CHECK_THAT(tree, IsOrderedCorrectly());
+        CHECK_THAT(tree, HasCorrectCount());
+      });
+    }
+    REQUIRE(distribution.GetTotalWeight() == count*(count-1)/2);
+    REQUIRE(distribution.GetUniqueCount() == count-1);
+
+    for (int i = 0; i < count; ++i) {
+      const int value = (i*perm+offset)%count;
+      const std::string key = std::to_string(value);
+      distribution.SetWeight(key, 0);
+      REQUIRE(distribution.GetWeight(key) == 0);
+      for (int j = i+1; j < count; ++j) {
+        const int value2 = (j*perm+offset)%count;
+        const std::string key2 = std::to_string(value2);
+        REQUIRE(distribution.GetWeight(key2) == value2);
+      }
+      TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {
+        CHECK_THAT(tree, IsBalanced());
+        CHECK_THAT(tree, IsOrderedCorrectly());
+        CHECK_THAT(tree, HasCorrectCount());
+      });
+    }
   }
 
   TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {

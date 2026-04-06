@@ -348,7 +348,7 @@ TEST_CASE("AutoBalancedTree") {
     CHECK_THAT(tree.Get("7"), NodeValueMatches(7));
   }
 
-  SECTION("functional test") {
+  SECTION("structure test") {
     const int count = 100;
     const int perm = 47;
     const int offset = 12;
