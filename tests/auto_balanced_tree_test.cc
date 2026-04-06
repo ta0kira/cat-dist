@@ -213,9 +213,9 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with lower+higher rebalancing") {
-    //       /5|            /4|
-    //    /3|   /7    ->  2|   /6
-    //  /2   4 6         1  3 7
+    //       /5|             /4|
+    //    /3|   /7  ->    /2|   /7
+    //  /2   4 6        1    3 6
     // 1
     tree.Set("5", 5);
     tree.Set("3", 3);

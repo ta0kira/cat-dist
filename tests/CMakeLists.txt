@@ -13,7 +13,8 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Catch2" EXCLUDE_FROM_ALL)
 
 add_executable(tests
   auto_balanced_tree_test.cc
-  categorical_distribution_test.cc)
+  categorical_distribution_test.cc
+)
 
 target_include_directories(tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
