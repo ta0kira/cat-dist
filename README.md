@@ -26,8 +26,8 @@ cat_dist::CategoricalDistribution<std::string> distribution;
 // ... fill in the distribution elsewhere ...
 
 const double random = ...  // uniform value from [0,1)
-const int target_weight = categories.GetTotalWeight()*random;
-const std::optional<std::string> chosen = categories.LocateByWeight(target_weight);
+const int target_weight = distribution.GetTotalWeight()*random;
+const std::optional<std::string> chosen = distribution.LocateByWeight(target_weight);
 ```
 
 This approach is optimal for all of the examples below. (Note that permuting requires decrementing the weight for each selected category.)
