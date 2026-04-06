@@ -158,8 +158,8 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with higher rebalancing") {
-    //   2            3
-    // 1   3    ->  1   4
+    //  /2|          /3|
+    // 1   3|   ->  1   4
     //       4
     tree.Set("2", 2);
     tree.Set("1", 1);
@@ -174,8 +174,8 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with lower rebalancing") {
-    //     3          2
-    //   2   4  ->  1   4
+    //    /3|        /2|
+    //  /2   4  ->  1   4
     // 1
     tree.Set("3", 3);
     tree.Set("2", 2);
@@ -187,6 +187,52 @@ TEST_CASE("AutoBalancedTree") {
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK(tree.Get("3") == nullptr);
     CHECK_THAT(tree.Get("4"), NodeValueMatches(4));
+  }
+
+  SECTION("removal with higher+lower rebalancing") {
+    //   /3|             /4|
+    // 1|   /5|    ->  1|   /5|
+    //   2 4   6|        2 6   7
+    //           7
+    tree.Set("3", 3);
+    tree.Set("1", 1);
+    tree.Set("5", 5);
+    tree.Set("2", 2);
+    tree.Set("4", 4);
+    tree.Set("6", 6);
+    tree.Set("7", 7);
+    tree.Unset("3");
+    CHECK(tree.node_count() == 6);
+    CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
+    CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
+    CHECK(tree.Get("3") == nullptr);
+    CHECK_THAT(tree.Get("4"), NodeValueMatches(4));
+    CHECK_THAT(tree.Get("5"), NodeValueMatches(5));
+    CHECK_THAT(tree.Get("6"), NodeValueMatches(6));
+    CHECK_THAT(tree.Get("7"), NodeValueMatches(7));
+  }
+
+  SECTION("removal with lower+higher rebalancing") {
+    //       /5|            /4|
+    //    /3|   /7    ->  2|   /6
+    //  /2   4 6         1  3 7
+    // 1
+    tree.Set("5", 5);
+    tree.Set("3", 3);
+    tree.Set("7", 7);
+    tree.Set("6", 6);
+    tree.Set("4", 4);
+    tree.Set("2", 2);
+    tree.Set("1", 1);
+    tree.Unset("5");
+    CHECK(tree.node_count() == 6);
+    CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
+    CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
+    CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
+    CHECK_THAT(tree.Get("4"), NodeValueMatches(4));
+    CHECK(tree.Get("5") == nullptr);
+    CHECK_THAT(tree.Get("6"), NodeValueMatches(6));
+    CHECK_THAT(tree.Get("7"), NodeValueMatches(7));
   }
 
   SECTION("functional test") {
