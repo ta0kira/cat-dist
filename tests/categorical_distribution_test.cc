@@ -128,21 +128,28 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(distribution.GetUniqueCount() == 2);
   }
 
-  SECTION("deep copy") {
+  SECTION("deep copy and move") {
     distribution.SetWeight("1", 1);
     distribution.SetWeight("2", 2);
     distribution.SetWeight("3", 3);
-    auto distribution2 = distribution.DeepCopy();
+    TestDistribution distribution2(distribution.DeepCopy());
+
     CHECK(distribution.GetWeight("1") == 1);
     CHECK(distribution.GetWeight("2") == 2);
     CHECK(distribution.GetWeight("3") == 3);
     CHECK(distribution2.GetWeight("1") == 1);
     CHECK(distribution2.GetWeight("2") == 2);
     CHECK(distribution2.GetWeight("3") == 3);
+
     distribution.ClearAll();
     CHECK(distribution2.GetWeight("1") == 1);
     CHECK(distribution2.GetWeight("2") == 2);
     CHECK(distribution2.GetWeight("3") == 3);
+
+    distribution = std::move(distribution2);
+    CHECK(distribution.GetWeight("1") == 1);
+    CHECK(distribution.GetWeight("2") == 2);
+    CHECK(distribution.GetWeight("3") == 3);
   }
 
   SECTION("structure test") {
