@@ -36,6 +36,16 @@ int main() {
   categories.SetWeight("1", 2);
   categories.SetWeight("2", 9);
 
+  // Show the items in order.
+  for (int i = 0; i < categories.GetTotalWeight(); ++i) {
+    const std::optional<std::string> chosen = categories.LocateByWeight(i);
+    // Should never be empty if `i` is in the valid range.
+    assert(chosen);
+    std::cout << *chosen;
+  }
+  std::cout << std::endl;
+
+  // Destructively generate the permutation. (Make a copy first with `DeepCopy()` if needed.)
   while (categories.GetTotalWeight() > 0) {
     const int target_weight = categories.GetTotalWeight()*distribution(generator);
     // Use a -1 adjustment to decrement the weight of the chosen category.

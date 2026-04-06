@@ -6,9 +6,9 @@ This library provides `cat_dist::CategoricalDistribution` (`#include "cat_dist/c
 
 ## Motivation
 
-This library is optimized for random sampling of a finite set of objects (e.g., _A_, _B_, _C_) while being able to efficiently update their relative weights dynamically. `cat_dist::CategoricalDistribution` is implemented so that both updating and sampling are **_O(log n)_**.
+This library is optimized for random sampling from a finite set of objects with relative weights, while being able to efficiently update their relative weights dynamically. `cat_dist::CategoricalDistribution` is implemented so that both updating and sampling are **_O(log n)_**.
 
-There are two simple ways to handle sampling and updating _without_ this library, but each approach is inefficient for one type of operation.
+There are two simple ways to handle sampling and updating _without_ the approach used by this library, but each approach is **_O(n)_** for either updating or sampling.
 
 1. **Vector of individual weights**: Assign each category to a vector index, and store the category's weight in its respective position.
    - _Updating_: Directly update the weight in the vector [**_O(1)_**]
@@ -17,7 +17,7 @@ There are two simple ways to handle sampling and updating _without_ this library
    - _Updating_: Update the weight in the vector, plus all weights that follow it [**_O(n)_**]
    - _Sampling_: Select a random number between 0 and the total weight, and perform a binary search on the vector [**_O(log n)_**]
 
-Both of these are **_O(n)_** for one operation, and therefore might not be suitable for frequent updates and sampling. Updating the vectors for newly-encountered values also adds complexity.
+**_O(n)_** doesn't scale well with massive sets of categories.
 
 ## Uses
 
