@@ -20,4 +20,13 @@ jobs:
           mkdir -p tests/build && cd tests/build
           cmake ..
           make -j$(getconf _NPROCESSORS_ONLN)
-          ./tests
+      - name: Run Tests
+        run: |
+          tests/build/tests --reporter console --reporter JUnit::out=tests.xml
+      - name: Create Test Report
+        uses: dorny/test-reporter@v3
+        if: success() || failure()
+        with:
+          name: C++ Test Report
+          path: tests.xml
+          reporter: java-junit
