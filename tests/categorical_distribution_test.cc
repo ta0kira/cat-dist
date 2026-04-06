@@ -94,6 +94,26 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "2", "3" });
   }
 
+  SECTION("deep copy") {
+    distribution.SetWeight("1", 1);
+    distribution.SetWeight("2", 2);
+    distribution.SetWeight("3", 3);
+    auto distribution2 = distribution.DeepCopy();
+    CHECK(distribution.GetWeight("1") == 1);
+    CHECK(distribution.GetWeight("2") == 2);
+    CHECK(distribution.GetWeight("3") == 3);
+    CHECK(distribution2.GetWeight("1") == 1);
+    CHECK(distribution2.GetWeight("2") == 2);
+    CHECK(distribution2.GetWeight("3") == 3);
+    distribution.SetWeight("1", 7);
+    distribution.SetWeight("2", 7);
+    distribution.SetWeight("3", 7);
+    CHECK(distribution2.GetWeight("1") == 1);
+    CHECK(distribution2.GetWeight("2") == 2);
+    CHECK(distribution2.GetWeight("3") == 3);
+
+  }
+
   TestDistribution::TestVisitor::ValidateTree(distribution, [](const auto& tree) {
     CHECK_THAT(tree, IsBalanced());
     CHECK_THAT(tree, IsOrderedCorrectly());

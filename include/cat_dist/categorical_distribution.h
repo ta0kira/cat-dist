@@ -14,6 +14,9 @@ namespace cat_dist {
 template<class C, class W = int>
 class CategoricalDistribution {
  public:
+  CategoricalDistribution() = default;
+  CategoricalDistribution DeepCopy() const;
+
   W GetTotalWeight() const;
   int GetUniqueCount() const;
   std::set<C> GetUniqueCategories() const;
@@ -31,6 +34,8 @@ class CategoricalDistribution {
  private:
   static constexpr W ZERO{};
   class CategoricalNode;
+
+  explicit CategoricalDistribution(AutoBalancedTree<CategoricalNode> tree) : tree_(std::move(tree)) {}
 
   AutoBalancedTree<CategoricalNode> tree_;
 };
@@ -54,7 +59,8 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   using K = C;
   using V = W;
 
-  explicit CategoricalNode(C category) : category_(std::move(category)) {}
+  CategoricalNode(C category, W weight) : category_(std::move(category)), size_(std::move(weight)) {}
+  std::unique_ptr<CategoricalNode> CopyNode() const;
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
   static void CollectCategories(const CategoricalNode* node, std::set<C>& output);
@@ -91,6 +97,19 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   std::unique_ptr<CategoricalNode> higher_child_;
   std::unique_ptr<CategoricalNode> lower_child_;
 };
+
+template<class C, class W>
+std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode> CategoricalDistribution<C, W>::CategoricalNode::CopyNode() const {
+  std::unique_ptr<CategoricalNode> new_node = std::make_unique<CategoricalNode>(category_, size_);
+  if (higher_child_) {
+    new_node->lower_child_ = lower_child_->CopyNode();
+  }
+  if (higher_child_) {
+    new_node->higher_child_ = higher_child_->CopyNode();
+  }
+  new_node->UpdateNode();
+  return new_node;
+}
 
 template<class C, class W>
 const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, W weight) {
@@ -137,6 +156,11 @@ void CategoricalDistribution<C, W>::CategoricalNode::UpdateNode() {
   if (lower_child_) {
     total_ += lower_child_->total_;
   }
+}
+
+template<class C, class W>
+CategoricalDistribution<C, W> CategoricalDistribution<C, W>::DeepCopy() const {
+  return CategoricalDistribution(tree_.DeepCopy());
 }
 
 template<class C, class W>

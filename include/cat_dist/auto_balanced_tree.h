@@ -17,6 +17,7 @@ class AutoBalancedTree {
   using V = typename TreeNodeOperations<N>::V;
 
   AutoBalancedTree() = default;
+  AutoBalancedTree DeepCopy() const;
 
   N* root_node() { return root_node_.get(); }
   const N* root_node() const { return root_node_.get(); }
@@ -32,6 +33,8 @@ class AutoBalancedTree {
   bool ValidateCount(std::ostream* error_log) const;
 
  private:
+  AutoBalancedTree(int node_count, std::unique_ptr<N> root_node) : node_count_(node_count), root_node_(std::move(root_node)) {}
+
   static int GetBalance(const N* node);
   static bool CheckBalance(const N* node, std::ostream* error_log);
   static bool CheckOrder(const N* node, std::ostream* error_log);
@@ -59,6 +62,11 @@ namespace cat_dist {
     const auto discarded_result = stmt; \
     assert(!discarded_result); \
   } while (0)
+
+template<class N>
+AutoBalancedTree<N> AutoBalancedTree<N>::DeepCopy() const {
+  return AutoBalancedTree<N>(node_count_, root_node_ ? TreeNodeOperations<N>::CopyNode(*root_node_) : nullptr);
+}
 
 template<class N>
 const N* AutoBalancedTree<N>::Get(const K& key) const {
@@ -187,8 +195,7 @@ int AutoBalancedTree<N>::Exchange(std::unique_ptr<N>& node, const K& key, const 
   if (!node) {
     if (value) {
       size_change = 1;
-      new_root = TreeNodeOperations<N>::NewNode(key);
-      TreeNodeOperations<N>::SetValue(*new_root, *value);
+      new_root = TreeNodeOperations<N>::NewNode(key, *value);
       TreeNodeOperations<N>::UpdateNode(*new_root);
     }
   } else if (TreeNodeOperations<N>::KeyLessThan(key, TreeNodeOperations<N>::GetKey(*node))) {

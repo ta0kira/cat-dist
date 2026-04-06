@@ -20,7 +20,7 @@ class TestNode {
   using K = std::string;
   using V = int;
 
-  explicit TestNode(K key) : key_(std::move(key)) {}
+  TestNode(K key, V value) : key_(std::move(key)), value_(std::move(value)) {}
 
   const std::unique_ptr<TestNode>& GetHigherNode() const { return higher_child_; }
   const std::unique_ptr<TestNode>& GetLowerNode() const { return lower_child_; }

@@ -10,7 +10,8 @@ struct TreeNodeOperations {
   using K = typename N::K;
   using V = typename N::V;
 
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(K key) { return std::make_unique<N>(std::move(key)); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(const K& key, const V& value) { return std::make_unique<N>(key, value); }
+  static __attribute__((warn_unused_result)) std::unique_ptr<N> CopyNode(const N& node) { return node.CopyNode(); }
 
   static const std::unique_ptr<N>& GetHigherNode(const N& node) { return node.GetHigherNode(); }
   static const std::unique_ptr<N>& GetLowerNode(const N& node) { return node.GetLowerNode(); }
