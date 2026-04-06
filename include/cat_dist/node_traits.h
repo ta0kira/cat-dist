@@ -27,24 +27,25 @@ template<class N>
 struct TreeNodeOperations {
   using K = typename N::K;
   using V = typename N::V;
+  using NP = std::unique_ptr<N>;
 
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> NewNode(const K& key, const V& value) { return std::make_unique<N>(key, value); }
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> CopyNode(const N& node) { return node.CopyNode(); }
+  static __attribute__((warn_unused_result)) NP NewNode(const K& key, const V& value) { return std::make_unique<N>(key, value); }
+  static __attribute__((warn_unused_result)) NP CopyNode(const N& node) { return node.CopyNode(); }
 
-  static const std::unique_ptr<N>& GetHigherNode(const N& node) { return node.GetHigherNode(); }
-  static const std::unique_ptr<N>& GetLowerNode(const N& node) { return node.GetLowerNode(); }
+  static const NP& GetHigherNode(const N& node) { return node.GetHigherNode(); }
+  static const NP& GetLowerNode(const N& node) { return node.GetLowerNode(); }
   static const K& GetKey(const N& node) { return node.GetKey(); }
   static const V& GetValue(const N& node) { return node.GetValue(); }
   static int GetHeight(const N& node) { return node.GetHeight(); }
 
   static bool KeyLessThan(const K& key1, const K& key2) { return key1 < key2; }
 
-  static std::unique_ptr<N>& GetHigherNode(N& node) { return node.GetHigherNode(); }
-  static std::unique_ptr<N>& GetLowerNode(N& node) { return node.GetLowerNode(); }
+  static NP& GetHigherNode(N& node) { return node.GetHigherNode(); }
+  static NP& GetLowerNode(N& node) { return node.GetLowerNode(); }
   static V& GetValue(N& node) { return node.GetValue(); }
 
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> SetHigherNode(N& node, std::unique_ptr<N> child) { return node.SetHigherNode(std::move(child)); }
-  static __attribute__((warn_unused_result)) std::unique_ptr<N> SetLowerNode(N& node, std::unique_ptr<N> child) { return node.SetLowerNode(std::move(child)); }
+  static __attribute__((warn_unused_result)) NP SetHigherNode(N& node, NP child) { return node.SetHigherNode(std::move(child)); }
+  static __attribute__((warn_unused_result)) NP SetLowerNode(N& node, NP child) { return node.SetLowerNode(std::move(child)); }
   static void SetValue(N& node, V value) { node.SetValue(std::move(value)); }
   static void UpdateNode(N& node) { node.UpdateNode(); }
 };

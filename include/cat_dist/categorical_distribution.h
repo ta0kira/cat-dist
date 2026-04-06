@@ -79,30 +79,31 @@ class CategoricalDistribution<C, W>::CategoricalNode {
  public:
   using K = C;
   using V = W;
+  using PN = std::unique_ptr<CategoricalNode>;
 
   CategoricalNode(C category, W weight) : category_(std::move(category)), size_(std::move(weight)) {}
-  std::unique_ptr<CategoricalNode> CopyNode() const;
+  PN CopyNode() const;
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
   static void TraversePreorder(const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : kZero; }
 
-  const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
-  const std::unique_ptr<CategoricalNode>& GetLowerNode() const { return lower_child_; }
+  const PN& GetHigherNode() const { return higher_child_; }
+  const PN& GetLowerNode() const { return lower_child_; }
   const C& GetKey() const { return category_; }
   const W& GetValue() const { return size_; }
   int GetHeight() const { return height_; }
 
-  std::unique_ptr<CategoricalNode>& GetHigherNode() { return higher_child_; }
-  std::unique_ptr<CategoricalNode>& GetLowerNode() { return lower_child_; }
+  PN& GetHigherNode() { return higher_child_; }
+  PN& GetLowerNode() { return lower_child_; }
   W& GetValue() { return size_; }
 
-  std::unique_ptr<CategoricalNode> SetHigherNode(std::unique_ptr<CategoricalNode> child) {
+  PN SetHigherNode(PN child) {
     auto old_child = std::move(higher_child_);
     higher_child_ = std::move(child);
     return old_child;
   }
-  std::unique_ptr<CategoricalNode> SetLowerNode(std::unique_ptr<CategoricalNode> child) {
+  PN SetLowerNode(PN child) {
     auto old_child = std::move(lower_child_);
     lower_child_ = std::move(child);
     return old_child;
@@ -115,13 +116,13 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   const C category_;
   W size_ {};
   W total_ {};
-  std::unique_ptr<CategoricalNode> higher_child_;
-  std::unique_ptr<CategoricalNode> lower_child_;
+  PN higher_child_;
+  PN lower_child_;
 };
 
 template<class C, class W>
 std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode> CategoricalDistribution<C, W>::CategoricalNode::CopyNode() const {
-  std::unique_ptr<CategoricalNode> new_node = std::make_unique<CategoricalNode>(category_, size_);
+  PN new_node = std::make_unique<CategoricalNode>(category_, size_);
   if (higher_child_) {
     new_node->lower_child_ = lower_child_->CopyNode();
   }
