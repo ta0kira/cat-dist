@@ -67,7 +67,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   void UpdateNode();
 
  private:
-  int height_ = 0;
+  int height_ = 1;
   const C category_;
   W size_ {};
   W total_ {};

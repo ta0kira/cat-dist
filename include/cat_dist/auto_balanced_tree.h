@@ -219,7 +219,8 @@ int AutoBalancedTree<N>::Exchange(std::unique_ptr<N>& node, const K& key, const 
     if (value) {
       size_change = 1;
       new_root = TreeNodeAllocation<N>::NewNode(key);
-      new_root->SetValue(*value);
+      TreeNodeOperations<N>::SetValue(*new_root, *value);
+      TreeNodeOperations<N>::UpdateNode(*new_root);
     }
   } else if (TreeNodeOperations<N>::KeyLessThan(key, TreeNodeOperations<N>::GetKey(*node))) {
     std::unique_ptr<N> new_root2;
@@ -340,6 +341,8 @@ std::unique_ptr<N> AutoBalancedTree<N>::Remove(std::unique_ptr<N>& node) {
     ASSERT_NULL_RETURN(TreeNodeOperations<N>::SetLowerNode(*replacement, std::move(new_lower)));
     TreeNodeOperations<N>::UpdateNode(*replacement);
   }
+  assert(!TreeNodeOperations<N>::GetHigherNode(*node));
+  assert(!TreeNodeOperations<N>::GetLowerNode(*node));
   node.reset();
   return replacement;
 }

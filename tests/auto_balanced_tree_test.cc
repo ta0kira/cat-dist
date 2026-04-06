@@ -1,6 +1,9 @@
 #include "cat_dist/auto_balanced_tree.h"
 
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 
 #include <catch2/catch_test_macros.hpp>
@@ -9,6 +12,8 @@
 
 using namespace cat_dist;
 using namespace cat_dist::tests;
+
+namespace {
 
 class TestNode {
  public:
@@ -49,7 +54,7 @@ class TestNode {
   }
 
  private:
-  int height_ = 0;
+  int height_ = 1;
   const K key_;
   V value_ = 0;
   std::unique_ptr<TestNode> higher_child_;
@@ -57,6 +62,12 @@ class TestNode {
 };
 
 using TestTree = AutoBalancedTree<TestNode>;
+
+void DescribeTree(const TestTree& tree, std::ostream& output);
+
+std::string ZeroPad(int x, int digits);
+
+}  // namespace
 
 TEST_CASE("AutoBalancedTree") {
   TestTree tree;
@@ -184,9 +195,9 @@ TEST_CASE("AutoBalancedTree") {
     const int offset = 12;
 
     for (int i = 0; i < count; ++i) {
-      const std::string error_note = "[insert iteration " + std::to_string(i) + "] ";
+      const std::string error_note = QuickFormat() << "[insert iteration " << i << "] ";
       const int value = (i*perm+offset)%count;
-      const std::string key = std::to_string(value);
+      const std::string key = ZeroPad(value, 3);
       tree.Set(key, value);
       REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
       REQUIRE(tree.node_count() == i+1);
@@ -195,24 +206,29 @@ TEST_CASE("AutoBalancedTree") {
       REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
 
+    std::cerr << "### Tree after creation ###" << std::endl;
+    DescribeTree(tree, std::cerr);
+
     for (int i = 0; i < count; ++i) {
-      const std::string error_note = "[check iteration " + std::to_string(i) + "] ";
+      const std::string error_note = QuickFormat() << "[check iteration " << i << "] ";
       const int value = (i*perm+offset)%count;
-      const std::string key = std::to_string(value);
+      const std::string key = ZeroPad(value, 3);
       REQUIRE_THAT(tree.Get(key), NodeValueMatches(value, error_note));
     }
 
     for (int i = 0; i < count; ++i) {
-      const std::string error_note = "[remove iteration " + std::to_string(i) + "] ";
+      const std::string error_note = QuickFormat() << "[remove iteration " << i << "] ";
       const int value = (i*perm+offset)%count;
-      const std::string key = std::to_string(value);
+      const std::string key = ZeroPad(value, 3);
       tree.Unset(key);
+      std::cerr << "### Tree after removal " << i << " ###" << std::endl;
+      DescribeTree(tree, std::cerr);
       REQUIRE(tree.Get(key) == nullptr);
       REQUIRE(tree.node_count() == count-i-1);
       for (int j = i+1; j < count; ++j) {
-        const std::string error_note2 = "[remove iteration " + std::to_string(i) + ":" + std::to_string(i) + "] ";
+        const std::string error_note2 = QuickFormat() << "[remove iteration " << i << ":" << j << "] ";
         const int value2 = (j*perm+offset)%count;
-        const std::string key2 = std::to_string(value2);
+        const std::string key2 = ZeroPad(value2, 3);
         REQUIRE_THAT(tree.Get(key2), NodeValueMatches(value2, error_note2));
       }
       REQUIRE_THAT(tree, IsBalanced(error_note));
@@ -225,3 +241,35 @@ TEST_CASE("AutoBalancedTree") {
   CHECK_THAT(tree, IsOrderedCorrectly());
   CHECK_THAT(tree, HasCorrectCount());
 }
+
+namespace {
+
+void DescribeNode(const TestNode* node, std::ostream& output, const std::string& prefix) {
+  if (node) {
+    output << node->GetKey() << std::endl;
+    if (const auto& lower = node->GetLowerNode()) {
+      output << prefix << "|->";
+      DescribeNode(lower.get(), output, prefix + "|  ");
+    } else if (node->GetHigherNode()) {
+      std::cerr << prefix << "|->_" << std::endl;
+    }
+    if (const auto& higher = node->GetHigherNode()) {
+      output << prefix << "\\->";
+      DescribeNode(higher.get(), output, prefix + "   ");
+    } else if (node->GetLowerNode()) {
+      std::cerr << prefix << "\\->_" << std::endl;
+    }
+  }
+}
+
+void DescribeTree(const TestTree& tree, std::ostream& output) {
+  DescribeNode(tree.root_node(), output, "");
+}
+
+std::string ZeroPad(int x, int digits) {
+  std::ostringstream formatted;
+  formatted << std::setfill('0') << std::setw(digits) << x;
+  return formatted.str();
+}
+
+}  // namespace

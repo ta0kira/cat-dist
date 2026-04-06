@@ -8,6 +8,22 @@
 
 namespace cat_dist::tests {
 
+class QuickFormat {
+ public:
+  template<class T>
+  QuickFormat& operator<<(const T& value) {
+    static_cast<std::ostream&>(output_) << value;
+    return *this;
+  }
+
+  operator std::string() const {
+    return output_.str();
+  }
+
+ private:
+  std::ostringstream output_;
+};
+
 class IsBalanced : public Catch::Matchers::MatcherGenericBase {
  public:
   explicit IsBalanced(std::string note = "") : note_(std::move(note)) {}
@@ -18,7 +34,7 @@ class IsBalanced : public Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return note_ + "should be balanced\n" + output_.str();
+    return QuickFormat() << note_  << "should be balanced\n" << output_.str();
   }
 
  private:
@@ -36,7 +52,7 @@ class IsOrderedCorrectly : public Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return note_ + "should be ordered correctly\n" + output_.str();
+    return QuickFormat() << note_  << "should be ordered correctly\n" << output_.str();
   }
 
  private:
@@ -54,7 +70,7 @@ class HasCorrectCount : public Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return note_ + "should have correct node count\n" + output_.str();
+    return QuickFormat() << note_  << "should have correct node count\n" << output_.str();
   }
 
  private:
@@ -73,7 +89,7 @@ class CheckNodeValueMatches : public Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return note_ + "matches " + std::to_string(expected_);
+    return QuickFormat() << note_  << "matches " << expected_;
   }
 
  private:
