@@ -1,5 +1,7 @@
 # Categorical Distribution C++ Library
 
+[![Build and Test C++](https://github.com/ta0kira/cat-dist/actions/workflows/cxx-build-and-test.yml/badge.svg)](https://github.com/ta0kira/cat-dist/actions/workflows/cxx-build-and-test.yml)
+
 This library provides `cat_dist::CategoricalDistribution` (`#include "cat_dist/categorical_distribution.h"`), which represents a categorical distribution.
 
 ## Motivation
