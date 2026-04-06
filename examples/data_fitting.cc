@@ -32,7 +32,7 @@ int main() {
     }
   }
 
-  for (char category : categories.GetUniqueCategories()) {
-    std::cout << category << ": " << categories.GetWeight(category) << std::endl;
+  for (auto [category, weight] : categories.ExportWeights()) {
+    std::cout << category << ": " << weight << std::endl;
   }
 }
