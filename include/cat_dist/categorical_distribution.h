@@ -2,6 +2,7 @@
 #define CAT_DIST_CATEGORICAL_DISTRIBUTION_H_
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <set>
@@ -21,6 +22,7 @@ class CategoricalDistribution {
   W GetTotalWeight() const;
   int GetUniqueCount() const;
   std::set<C> GetUniqueCategories() const;
+  std::map<C, W> ExportWeights() const;
   void SetWeight(const C& category, const W& weight);
   void AdjustWeight(const C& category, const W& adjust);
   W GetWeight(const C& category) const;
@@ -64,7 +66,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
   std::unique_ptr<CategoricalNode> CopyNode() const;
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
-  static void CollectCategories(const CategoricalNode* node, std::set<C>& output);
+  static void TraversePreorder(const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function);
   static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : kZero; }
 
   const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
@@ -133,11 +135,11 @@ const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistri
 }
 
 template<class C, class W>
-void CategoricalDistribution<C, W>::CategoricalNode::CollectCategories(const CategoricalNode* node, std::set<C>& output) {
+void CategoricalDistribution<C, W>::CategoricalNode::TraversePreorder(const CategoricalNode* node, const std::function<void(const CategoricalNode&)>& function) {
   if (node) {
-    output.insert(node->GetKey());
-    CollectCategories(node->GetLowerNode().get(), output);
-    CollectCategories(node->GetHigherNode().get(), output);
+    function(*node);
+    TraversePreorder(node->GetLowerNode().get(), function);
+    TraversePreorder(node->GetHigherNode().get(), function);
   }
 }
 
@@ -182,7 +184,18 @@ int CategoricalDistribution<C, W>::GetUniqueCount() const {
 template<class C, class W>
 std::set<C> CategoricalDistribution<C, W>::GetUniqueCategories() const {
   std::set<C> output;
-  CategoricalNode::CollectCategories(tree_.root_node(), output);
+  CategoricalNode::TraversePreorder(tree_.root_node(), [&output](const auto& node) {
+    output.insert(node.GetKey());
+  });
+  return output;
+}
+
+template<class C, class W>
+std::map<C, W> CategoricalDistribution<C, W>::ExportWeights() const {
+  std::map<C, W> output;
+  CategoricalNode::TraversePreorder(tree_.root_node(), [&output](const auto& node) {
+    output.emplace(node.GetKey(), node.GetValue());
+  });
   return output;
 }
 

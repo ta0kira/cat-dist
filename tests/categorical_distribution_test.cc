@@ -55,13 +55,30 @@ TEST_CASE("CategoricalDistribution") {
     distribution.SetWeight("5", 6);
     CHECK(distribution.GetTotalWeight() == 37);
     CHECK(distribution.GetUniqueCount() == 5);
-    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "1", "2", "3", "4", "5" });
 
     distribution.SetWeight("3", 6);
     distribution.AdjustWeight("3", 1);
     distribution.SetWeight("4", 0);
     CHECK(distribution.GetTotalWeight() == 33);
     CHECK(distribution.GetUniqueCount() == 4);
+  }
+
+  SECTION("get unique") {
+    distribution.SetWeight("1", 5);
+    distribution.SetWeight("2", 15);
+    distribution.SetWeight("3", 2);
+    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "1", "2", "3" });
+  }
+
+  SECTION("export") {
+    distribution.SetWeight("1", 5);
+    distribution.SetWeight("2", 15);
+    distribution.SetWeight("3", 2);
+    std::map<std::string, int> exported = distribution.ExportWeights();
+    CHECK((signed) exported.size() == distribution.GetUniqueCount());
+    CHECK(exported["1"] == 5);
+    CHECK(exported["2"] == 15);
+    CHECK(exported["3"] == 2);
   }
 
   SECTION("locate") {
@@ -91,7 +108,6 @@ TEST_CASE("CategoricalDistribution") {
     CHECK_THAT(distribution.LocateByWeight(0, -1), OptionalMatches("2"));
     CHECK(distribution.GetTotalWeight() == 5);
     CHECK(distribution.GetUniqueCount() == 2);
-    CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "2", "3" });
   }
 
   SECTION("deep copy") {
