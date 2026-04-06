@@ -57,7 +57,8 @@ TEST_CASE("CategoricalDistribution") {
     CHECK(distribution.GetUniqueCount() == 5);
     CHECK(ToVector(distribution.GetUniqueCategories()) == std::vector<std::string>{ "1", "2", "3", "4", "5" });
 
-    distribution.SetWeight("3", 7);
+    distribution.SetWeight("3", 6);
+    distribution.AdjustWeight("3", 1);
     distribution.SetWeight("4", 0);
     CHECK(distribution.GetTotalWeight() == 33);
     CHECK(distribution.GetUniqueCount() == 4);

@@ -18,6 +18,7 @@ class CategoricalDistribution {
   int GetUniqueCount() const;
   std::set<C> GetUniqueCategories() const;
   void SetWeight(const C& category, const W& weight);
+  void AdjustWeight(const C& category, const W& adjust);
   W GetWeight(const C& category) const;
   const std::optional<C> LocateByWeight(const W& weight) const;
   const std::optional<C> LocateByWeight(const W& weight, const W& adjust);
@@ -162,6 +163,11 @@ void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight
   } else {
     tree_.Set(category, weight);
   }
+}
+
+template<class C, class W>
+void CategoricalDistribution<C, W>::AdjustWeight(const C& category, const W& adjust) {
+  SetWeight(category, GetWeight(category) + adjust);
 }
 
 template<class C, class W>

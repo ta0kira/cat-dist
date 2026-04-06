@@ -30,6 +30,7 @@ jobs:
           make -j$(getconf _NPROCESSORS_ONLN)
           ./random_weighted
           ./random_permutation
+          ./data_fitting < /dev/null
       - name: Create Test Report
         uses: dorny/test-reporter@v3
         if: success() || failure()

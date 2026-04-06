@@ -10,6 +10,9 @@ endif()
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/.." cat_dist EXCLUDE_FROM_ALL)
 
+add_executable(data_fitting data_fitting.cc)
+target_link_libraries(data_fitting cat_dist)
+
 add_executable(random_weighted random_weighted.cc)
 target_link_libraries(random_weighted cat_dist)
 

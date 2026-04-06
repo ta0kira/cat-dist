@@ -1,5 +1,6 @@
 #include <cassert>
 #include <ctime>
+#include <iostream>
 #include <optional>
 #include <random>
 #include <string>
