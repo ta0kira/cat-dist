@@ -33,7 +33,7 @@ class CategoricalDistribution {
 #endif  // CAT_DIST_TESTING
 
  private:
-  static constexpr W ZERO{};
+  static constexpr W kZero{};
   class CategoricalNode;
 
   explicit CategoricalDistribution(AutoBalancedTree<CategoricalNode> tree) : tree_(std::move(tree)) {}
@@ -65,7 +65,7 @@ class CategoricalDistribution<C, W>::CategoricalNode {
 
   static const CategoricalNode* LocateByWeight(const CategoricalNode* node, W weight);
   static void CollectCategories(const CategoricalNode* node, std::set<C>& output);
-  static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : ZERO; }
+  static W GetTotalWeight(const CategoricalNode* node) { return node ? node->total_ : kZero; }
 
   const std::unique_ptr<CategoricalNode>& GetHigherNode() const { return higher_child_; }
   const std::unique_ptr<CategoricalNode>& GetLowerNode() const { return lower_child_; }
@@ -114,7 +114,7 @@ std::unique_ptr<typename CategoricalDistribution<C, W>::CategoricalNode> Categor
 
 template<class C, class W>
 const typename CategoricalDistribution<C, W>::CategoricalNode* CategoricalDistribution<C, W>::CategoricalNode::LocateByWeight(const CategoricalNode* node, W weight) {
-  if (node && weight >= ZERO && weight < node->total_) {
+  if (node && weight >= kZero && weight < node->total_) {
     if (node->lower_child_) {
       if (weight < node->lower_child_->total_) {
         return LocateByWeight(node->lower_child_.get(), weight);
@@ -188,7 +188,7 @@ std::set<C> CategoricalDistribution<C, W>::GetUniqueCategories() const {
 
 template<class C, class W>
 void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight) {
-  if (weight <= ZERO) {
+  if (weight <= kZero) {
     tree_.Unset(category);
   } else {
     tree_.Set(category, weight);
@@ -203,7 +203,7 @@ void CategoricalDistribution<C, W>::AdjustWeight(const C& category, const W& adj
 template<class C, class W>
 W CategoricalDistribution<C, W>::GetWeight(const C& category) const {
   const CategoricalNode* node = tree_.Get(category);
-  return node ? node->GetValue() : ZERO;
+  return node ? node->GetValue() : kZero;
 }
 
 template<class C, class W>
