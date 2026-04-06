@@ -25,10 +25,8 @@ class AutoBalancedTree {
   const N* root_node() const { return root_node_.get(); }
   const int node_count() const { return node_count_; }
 
-  // Ownership of value is not passed.
   const N* Get(const K& key) const;
   N* Get(const K& key);
-  // Ownership of value is not passed.
   const void Set(const K& key, const V& value);
   const void Unset(const K& key);
 

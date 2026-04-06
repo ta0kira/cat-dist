@@ -1,6 +1,7 @@
 #ifndef CAT_DIST_TESTS_HELPERS_H_
 #define CAT_DIST_TESTS_HELPERS_H_
 
+#include <optional>
 #include <sstream>
 
 #include <catch2/catch_test_macros.hpp>
@@ -100,6 +101,35 @@ class CheckNodeValueMatches : public Catch::Matchers::MatcherGenericBase {
 template<class T>
 CheckNodeValueMatches<T> NodeValueMatches(const T& expected, std::string note = "") {
   return CheckNodeValueMatches<T>(expected, std::move(note));
+}
+
+template<class T>
+class CheckOptionalMatches : public Catch::Matchers::MatcherGenericBase {
+ public:
+  explicit CheckOptionalMatches(const T& expected, std::string note = "") : note_(std::move(note)), expected_(expected) {}
+
+  template<class T2>
+  bool match(const T2* actual) const {
+    return actual ? (*actual == expected_) : false;
+  }
+
+  template<class T2>
+  bool match(const std::optional<T2>& actual) const {
+    return actual ? (*actual == expected_) : false;
+  }
+
+  std::string describe() const override {
+    return QuickFormat() << note_  << "matches " << expected_;
+  }
+
+ private:
+  const std::string note_;
+  const T& expected_;
+};
+
+template<class T>
+CheckOptionalMatches<T> OptionalMatches(const T& expected, std::string note = "") {
+  return CheckOptionalMatches<T>(expected, std::move(note));
 }
 
 }  // namespace cat_dist::tests
