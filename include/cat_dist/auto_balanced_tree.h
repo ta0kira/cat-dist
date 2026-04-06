@@ -107,21 +107,15 @@ N* AutoBalancedTree<N>::Get(const K& key) {
 template<class N>
 const void AutoBalancedTree<N>::Set(const K& key, const V& value) {
   NP new_root;
-  const int size_change = Exchange(root_node_, key, &value, new_root);
-  node_count_ += size_change;
-  if (size_change != 0 || new_root) {
-    root_node_ = std::move(new_root);
-  }
+  node_count_ += Exchange(root_node_, key, &value, new_root);
+  root_node_ = std::move(new_root);
 }
 
 template<class N>
 const void AutoBalancedTree<N>::Unset(const K& key) {
   NP new_root;
-  const int size_change = Exchange(root_node_, key, nullptr, new_root);
-  node_count_ += size_change;
-  if (size_change != 0 || new_root) {
-    root_node_ = std::move(new_root);
-  }
+  node_count_ += Exchange(root_node_, key, nullptr, new_root);
+  root_node_ = std::move(new_root);
 }
 
 template<class N>
