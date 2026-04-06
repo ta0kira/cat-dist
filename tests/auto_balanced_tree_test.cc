@@ -67,6 +67,13 @@ void DescribeTree(const TestTree& tree, std::ostream& output);
 
 std::string ZeroPad(int x, int digits);
 
+std::unique_ptr<const MatcherNode<std::string>> EmptyNode();
+
+std::unique_ptr<const MatcherNode<std::string>> MatchNode(
+    std::string key,
+    std::unique_ptr<const MatcherNode<std::string>> lower = EmptyNode(),
+    std::unique_ptr<const MatcherNode<std::string>> higher = EmptyNode());
+
 }  // namespace
 
 TEST_CASE("AutoBalancedTree") {
@@ -77,6 +84,11 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("1", 1);
     tree.Set("3", 3);
     CHECK(tree.node_count() == 3);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("2",
+        MatchNode("1"),
+        MatchNode("3"))
+    ));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -88,6 +100,12 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("2", 2);
     tree.Set("1", 1);
     CHECK(tree.node_count() == 4);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("3",
+        MatchNode("2",
+          MatchNode("1")),
+        MatchNode("4"))
+    ));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -100,6 +118,13 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("3", 3);
     tree.Set("4", 4);
     CHECK(tree.node_count() == 4);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("2",
+        MatchNode("1"),
+        MatchNode("3",
+          EmptyNode(),
+          MatchNode("4")))
+    ));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -112,6 +137,13 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("1", 1);
     tree.Set("2", 2);
     CHECK(tree.node_count() == 4);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("3",
+        MatchNode("1",
+          EmptyNode(),
+          MatchNode("2")),
+        MatchNode("4"))
+    ));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -124,6 +156,12 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("3", 3);
     CHECK(tree.node_count() == 4);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("2",
+        MatchNode("1"),
+        MatchNode("4",
+          MatchNode("3")))
+    ));
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
     CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
@@ -158,14 +196,23 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with higher rebalancing") {
-    //  /2|          /3|
-    // 1   3|   ->  1   4
-    //       4
     tree.Set("2", 2);
     tree.Set("1", 1);
     tree.Set("3", 3);
     tree.Set("4", 4);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("2",
+        MatchNode("1"),
+        MatchNode("3",
+          EmptyNode(),
+          MatchNode("4")))
+    ));
     tree.Unset("2");
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("3",
+        MatchNode("1"),
+        MatchNode("4"))
+    ));
     CHECK(tree.node_count() == 3);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK(tree.Get("2") == nullptr);
@@ -174,14 +221,22 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with lower rebalancing") {
-    //    /3|        /2|
-    //  /2   4  ->  1   4
-    // 1
     tree.Set("3", 3);
     tree.Set("2", 2);
     tree.Set("4", 4);
     tree.Set("1", 1);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("3",
+        MatchNode("2",
+          MatchNode("1")),
+        MatchNode("4"))
+    ));
     tree.Unset("3");
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("2",
+        MatchNode("1"),
+        MatchNode("4"))
+    ));
     CHECK(tree.node_count() == 3);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -190,10 +245,6 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with higher+lower rebalancing") {
-    //   /3|             /4|
-    // 1|   /5|    ->  1|   /5|
-    //   2 4   6|        2 6   7
-    //           7
     tree.Set("3", 3);
     tree.Set("1", 1);
     tree.Set("5", 5);
@@ -201,7 +252,27 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("6", 6);
     tree.Set("7", 7);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("3",
+        MatchNode("1",
+          EmptyNode(),
+          MatchNode("2")),
+        MatchNode("5",
+          MatchNode("4"),
+          MatchNode("6",
+            EmptyNode(),
+            MatchNode("7"))))
+    ));
     tree.Unset("3");
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("4",
+        MatchNode("1",
+          EmptyNode(),
+          MatchNode("2")),
+        MatchNode("6",
+          MatchNode("5"),
+          MatchNode("7")))
+    ));
     CHECK(tree.node_count() == 6);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -213,10 +284,6 @@ TEST_CASE("AutoBalancedTree") {
   }
 
   SECTION("removal with lower+higher rebalancing") {
-    //       /5|             /4|
-    //    /3|   /7  ->    /2|   /7
-    //  /2   4 6        1    3 6
-    // 1
     tree.Set("5", 5);
     tree.Set("3", 3);
     tree.Set("7", 7);
@@ -224,7 +291,24 @@ TEST_CASE("AutoBalancedTree") {
     tree.Set("4", 4);
     tree.Set("2", 2);
     tree.Set("1", 1);
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("5",
+        MatchNode("3",
+          MatchNode("2",
+            MatchNode("1")),
+          MatchNode("4")),
+        MatchNode("7",
+          MatchNode("6")))
+    ));
     tree.Unset("5");
+    CHECK_THAT(tree.root_node(), MatchesStructure(
+      MatchNode("4",
+        MatchNode("2",
+          MatchNode("1"),
+          MatchNode("3")),
+        MatchNode("7",
+          MatchNode("6")))
+    ));
     CHECK(tree.node_count() == 6);
     CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
     CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
@@ -252,8 +336,10 @@ TEST_CASE("AutoBalancedTree") {
       REQUIRE_THAT(tree, HasCorrectCount(error_note));
     }
 
+#ifdef VERBOSE_TESTS
     std::cerr << "### Tree after creation ###" << std::endl;
     DescribeTree(tree, std::cerr);
+#endif  // VERBOSE_TESTS
 
     for (int i = 0; i < count; ++i) {
       const std::string error_note = QuickFormat() << "[check iteration " << i << "] ";
@@ -267,8 +353,10 @@ TEST_CASE("AutoBalancedTree") {
       const int value = (i*perm+offset)%count;
       const std::string key = ZeroPad(value, 3);
       tree.Unset(key);
+#ifdef VERBOSE_TESTS
       std::cerr << "### Tree after removal " << i << " ###" << std::endl;
       DescribeTree(tree, std::cerr);
+#endif  // VERBOSE_TESTS
       REQUIRE(tree.Get(key) == nullptr);
       REQUIRE(tree.node_count() == count-i-1);
       for (int j = i+1; j < count; ++j) {
@@ -290,7 +378,7 @@ TEST_CASE("AutoBalancedTree") {
 
 namespace {
 
-void DescribeNode(const TestNode* node, std::ostream& output, const std::string& prefix) {
+__attribute__((unused)) void DescribeNode(const TestNode* node, std::ostream& output, const std::string& prefix) {
   if (node) {
     output << node->GetKey() << std::endl;
     if (const auto& lower = node->GetLowerNode()) {
@@ -308,7 +396,7 @@ void DescribeNode(const TestNode* node, std::ostream& output, const std::string&
   }
 }
 
-void DescribeTree(const TestTree& tree, std::ostream& output) {
+__attribute__((unused)) void DescribeTree(const TestTree& tree, std::ostream& output) {
   DescribeNode(tree.root_node(), output, "");
 }
 
@@ -316,6 +404,21 @@ std::string ZeroPad(int x, int digits) {
   std::ostringstream formatted;
   formatted << std::setfill('0') << std::setw(digits) << x;
   return formatted.str();
+}
+
+std::unique_ptr<const MatcherNode<std::string>> EmptyNode() {
+  return nullptr;
+}
+
+std::unique_ptr<const MatcherNode<std::string>> MatchNode(
+    std::string key,
+    std::unique_ptr<const MatcherNode<std::string>> lower,
+    std::unique_ptr<const MatcherNode<std::string>> higher) {
+  return std::make_unique<MatcherNode<std::string>>(MatcherNode<std::string> {
+    .key = std::move(key),
+    .lower = std::move(lower),
+    .higher = std::move(higher),
+  });
 }
 
 }  // namespace

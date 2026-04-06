@@ -1,6 +1,7 @@
 #ifndef CAT_DIST_TESTS_HELPERS_H_
 #define CAT_DIST_TESTS_HELPERS_H_
 
+#include <memory>
 #include <optional>
 #include <sstream>
 
@@ -130,6 +131,60 @@ class CheckOptionalMatches : public Catch::Matchers::MatcherGenericBase {
 template<class T>
 CheckOptionalMatches<T> OptionalMatches(const T& expected, std::string note = "") {
   return CheckOptionalMatches<T>(expected, std::move(note));
+}
+
+template<class T>
+struct MatcherNode {
+  const T key;
+  std::unique_ptr<const MatcherNode> lower;
+  std::unique_ptr<const MatcherNode> higher;
+};
+
+template<class T>
+class StructureMatcher : public Catch::Matchers::MatcherGenericBase {
+ public:
+  explicit StructureMatcher(std::unique_ptr<const MatcherNode<T>> nodes = nullptr) : nodes_(std::move(nodes)) {}
+
+  template<class N>
+  bool match(const N* root_node) const {
+    return RecursiveMatch(root_node, nodes_.get());
+  }
+
+  std::string describe() const override {
+    return QuickFormat() << "matches structure\n" << output_.str();;
+  }
+
+ private:
+  template<class N>
+  bool RecursiveMatch(const N* actual, const MatcherNode<T>* expected) const {
+    if (!actual && !expected) {
+      return true;
+    }
+    if (!actual) {
+      output_ << "expected key " << expected->key << " but got missing" << std::endl;
+      return false;
+    }
+    if (!expected) {
+      output_ << "expected missing but got key " << actual->GetKey() << std::endl;
+      return false;
+    }
+    bool matches = true;
+    if (actual->GetKey() != expected->key) {
+      matches = false;
+      output_ << "expected key " << expected->key << " but got key " << actual->GetKey() << std::endl;
+    }
+    matches &= RecursiveMatch(actual->GetLowerNode().get(), expected->lower.get());
+    matches &= RecursiveMatch(actual->GetHigherNode().get(), expected->higher.get());
+    return matches;
+  }
+
+  const std::unique_ptr<const MatcherNode<T>> nodes_;
+  mutable std::ostringstream output_;
+};
+
+template<class T>
+StructureMatcher<T> MatchesStructure(std::unique_ptr<const MatcherNode<T>> expected = nullptr) {
+  return StructureMatcher<T>(std::move(expected));
 }
 
 }  // namespace cat_dist::tests
