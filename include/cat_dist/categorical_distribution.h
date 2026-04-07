@@ -41,8 +41,10 @@ class CategoricalDistribution {
   int GetUniqueCount() const;
   std::set<C> GetUniqueCategories() const;
   std::map<C, W> ExportWeights() const;
-  void SetWeight(const C& category, const W& weight);
-  void AdjustWeight(const C& category, const W& adjust);
+  // Returns previous value.
+  W SetWeight(const C& category, const W& weight);
+  // Returns new value.
+  W AdjustWeight(const C& category, const W& adjust);
   W GetWeight(const C& category) const;
   const std::optional<C> LocateByWeight(const W& weight) const;
   const std::optional<C> LocateByWeight(const W& weight, const W& adjust);
@@ -227,17 +229,21 @@ std::map<C, W> CategoricalDistribution<C, W>::ExportWeights() const {
 }
 
 template <class C, class W>
-void CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight) {
+W CategoricalDistribution<C, W>::SetWeight(const C& category, const W& weight) {
+  std::optional<W> old_value;
   if (weight <= kZero) {
-    tree_.Unset(category);
+    tree_.Unset(category, &old_value);
   } else {
-    tree_.Set(category, weight);
+    tree_.Set(category, weight, &old_value);
   }
+  return old_value ? *old_value : kZero;
 }
 
 template <class C, class W>
-void CategoricalDistribution<C, W>::AdjustWeight(const C& category, const W& adjust) {
-  SetWeight(category, GetWeight(category) + adjust);
+W CategoricalDistribution<C, W>::AdjustWeight(const C& category, const W& adjust) {
+  const W new_weight = GetWeight(category) + adjust;
+  SetWeight(category, new_weight);
+  return new_weight;
 }
 
 template <class C, class W>

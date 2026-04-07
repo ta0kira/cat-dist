@@ -68,14 +68,15 @@ TEST_CASE("CategoricalDistribution") {
   SECTION("update weights") {
     distribution.SetWeight("1", 5);
     distribution.SetWeight("2", 15);
-    distribution.SetWeight("3", 2);
+    CHECK(distribution.SetWeight("3", 2) == 0);
     distribution.SetWeight("4", 9);
     distribution.SetWeight("5", 6);
     CHECK(distribution.GetTotalWeight() == 37);
     CHECK(distribution.GetUniqueCount() == 5);
 
-    distribution.SetWeight("3", 6);
-    distribution.AdjustWeight("3", 1);
+    CHECK(distribution.SetWeight("3", 6) == 2);
+    CHECK(distribution.AdjustWeight("3", 1) == 7);
+    CHECK(distribution.GetWeight("3") == 7);
     distribution.SetWeight("4", 0);
     CHECK(distribution.GetTotalWeight() == 33);
     CHECK(distribution.GetUniqueCount() == 4);

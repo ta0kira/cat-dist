@@ -21,6 +21,7 @@ limitations under the License.
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -369,6 +370,21 @@ TEST_CASE("AutoBalancedTree") {
     CHECK(tree.Get("5") == nullptr);
     CHECK_THAT(tree.Get("6"), NodeValueMatches(6));
     CHECK_THAT(tree.Get("7"), NodeValueMatches(7));
+  }
+
+  SECTION("getting old value") {
+    std::optional<int> old_value = 3;
+    tree.Set("1", 1, &old_value);
+    CHECK(old_value == std::nullopt);
+    tree.Set("1", 2, &old_value);
+    CHECK_THAT(old_value, OptionalMatches(1));
+    tree.Unset("1", &old_value);
+    CHECK_THAT(old_value, OptionalMatches(2));
+    tree.Unset("1", &old_value);
+    CHECK(old_value == std::nullopt);
+    old_value = 3;
+    tree.Unset("1", &old_value);
+    CHECK(old_value == std::nullopt);
   }
 
   SECTION("structure test") {
