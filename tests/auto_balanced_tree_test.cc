@@ -34,10 +34,11 @@ using namespace cat_dist::tests;
 
 namespace {
 
+template <class T>
 class TestNode {
  public:
   using K = std::string;
-  using V = int;
+  using V = T;
 
   TestNode(K key, V value) : key_(std::move(key)), value_(std::move(value)) {}
 
@@ -80,7 +81,8 @@ class TestNode {
   std::unique_ptr<TestNode> lower_child_;
 };
 
-using TestTree = AutoBalancedTree<TestNode>;
+using TestTree = AutoBalancedTree<TestNode<int>>;
+using NoCopyTree = AutoBalancedTree<TestNode<std::unique_ptr<std::string>>>;
 
 void DescribeTree(const TestTree& tree, std::ostream& output);
 
@@ -387,6 +389,31 @@ TEST_CASE("AutoBalancedTree") {
     CHECK(old_value == std::nullopt);
   }
 
+  SECTION("uncopyable value type") {
+    NoCopyTree tree;
+    std::optional<std::unique_ptr<std::string>> old_value;
+    const TestNode<std::unique_ptr<std::string>>* node = nullptr;
+
+    tree.Set("1", std::make_unique<std::string>("one"), &old_value);
+    node = tree.Get("1");
+    REQUIRE(node);
+    CHECK_THAT(node->GetValue(), OptionalMatches("one"));
+    CHECK(old_value == std::nullopt);
+
+    tree.Set("1", std::make_unique<std::string>("two"), &old_value);
+    node = tree.Get("1");
+    REQUIRE(node);
+    CHECK_THAT(node->GetValue(), OptionalMatches("two"));
+    REQUIRE(old_value);
+    CHECK_THAT(*old_value, OptionalMatches("one"));
+
+    tree.Unset("1", &old_value);
+    node = tree.Get("1");
+    REQUIRE_FALSE(node);
+    REQUIRE(old_value);
+    CHECK_THAT(*old_value, OptionalMatches("two"));
+  }
+
   SECTION("structure test") {
     const int count = 100;
     const int perm = 47;
@@ -447,7 +474,8 @@ TEST_CASE("AutoBalancedTree") {
 
 namespace {
 
-__attribute__((unused)) void DescribeNode(const TestNode* node, std::ostream& output,
+template <class T>
+__attribute__((unused)) void DescribeNode(const TestNode<T>* node, std::ostream& output,
                                           const std::string& prefix) {
   if (node) {
     output << node->GetKey() << std::endl;

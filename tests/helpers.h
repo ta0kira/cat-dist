@@ -127,13 +127,8 @@ class CheckOptionalMatches : public Catch::Matchers::MatcherGenericBase {
   explicit CheckOptionalMatches(const T& expected, std::string note = "")
       : note_(std::move(note)), expected_(expected) {}
 
-  template <class T2>
-  bool match(const T2* actual) const {
-    return actual ? (*actual == expected_) : false;
-  }
-
-  template <class T2>
-  bool match(const std::optional<T2>& actual) const {
+  template <class O>
+  bool match(const O& actual) const {
     return actual ? (*actual == expected_) : false;
   }
 

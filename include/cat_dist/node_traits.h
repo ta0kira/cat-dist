@@ -29,8 +29,8 @@ struct TreeNodeOperations {
   using V = typename N::V;
   using NP = std::unique_ptr<N>;
 
-  static __attribute__((warn_unused_result)) NP NewNode(const K& key, const V& value) {
-    return std::make_unique<N>(key, value);
+  static __attribute__((warn_unused_result)) NP NewNode(const K& key, V value) {
+    return std::make_unique<N>(key, std::move(value));
   }
   static __attribute__((warn_unused_result)) NP CopyNode(const N& node) { return node.CopyNode(); }
 
