@@ -47,12 +47,12 @@ class AutoBalancedTree {
 
   N* root_node() { return root_node_.get(); }
   const N* root_node() const { return root_node_.get(); }
-  const int node_count() const { return node_count_; }
+  int node_count() const { return node_count_; }
 
   const N* Get(const K& key) const;
   N* Get(const K& key);
-  const void Set(const K& key, V value, std::optional<V>* old_value = nullptr);
-  const void Unset(const K& key, std::optional<V>* old_value = nullptr);
+  void Set(const K& key, V value, std::optional<V>* old_value = nullptr);
+  void Unset(const K& key, std::optional<V>* old_value = nullptr);
 
   bool CheckBalance(std::ostream* error_log) const;
   bool CheckOrder(std::ostream* error_log) const;
@@ -130,14 +130,14 @@ N* AutoBalancedTree<N>::Get(const K& key) {
 }
 
 template <class N>
-const void AutoBalancedTree<N>::Set(const K& key, V value, std::optional<V>* old_value) {
+void AutoBalancedTree<N>::Set(const K& key, V value, std::optional<V>* old_value) {
   NP new_root;
   node_count_ += Exchange(root_node_, key, &value, new_root, old_value);
   root_node_ = std::move(new_root);
 }
 
 template <class N>
-const void AutoBalancedTree<N>::Unset(const K& key, std::optional<V>* old_value) {
+void AutoBalancedTree<N>::Unset(const K& key, std::optional<V>* old_value) {
   NP new_root;
   node_count_ += Exchange(root_node_, key, nullptr, new_root, old_value);
   root_node_ = std::move(new_root);
