@@ -34,6 +34,11 @@ template <class C, class W = int>
 class CategoricalDistribution {
  public:
   CategoricalDistribution() = default;
+  CategoricalDistribution(CategoricalDistribution&& other) = default;
+  CategoricalDistribution& operator=(CategoricalDistribution&& other) = default;
+  CategoricalDistribution(const CategoricalDistribution& other) = delete;
+  CategoricalDistribution& operator=(const CategoricalDistribution& other) = delete;
+
   CategoricalDistribution DeepCopy() const;
   void ClearAll();
 
@@ -46,8 +51,8 @@ class CategoricalDistribution {
   // Returns new value.
   W AdjustWeight(const C& category, const W& adjust);
   W GetWeight(const C& category) const;
-  const std::optional<C> LocateByWeight(const W& weight) const;
-  const std::optional<C> LocateByWeight(const W& weight, const W& adjust);
+  std::optional<C> LocateByWeight(const W& weight) const;
+  std::optional<C> LocateByWeight(const W& weight, const W& adjust);
 
 #ifdef CAT_DIST_TESTING
   struct TestVisitor;
@@ -253,7 +258,7 @@ W CategoricalDistribution<C, W>::GetWeight(const C& category) const {
 }
 
 template <class C, class W>
-const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight) const {
+std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight) const {
   const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
   if (node) {
     return node->GetKey();
@@ -263,8 +268,7 @@ const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& we
 }
 
 template <class C, class W>
-const std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight,
-                                                                     const W& adjust) {
+std::optional<C> CategoricalDistribution<C, W>::LocateByWeight(const W& weight, const W& adjust) {
   const CategoricalNode* node = CategoricalNode::LocateByWeight(tree_.root_node(), weight);
   if (node) {
     const auto key = node->GetKey();
