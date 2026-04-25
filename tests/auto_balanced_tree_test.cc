@@ -418,6 +418,40 @@ TEST_CASE("AutoBalancedTree") {
     CHECK_THAT(tree2.Get("3"), NodeValueMatches(3));
   }
 
+  SECTION("move") {
+    tree.Set("2", 2);
+    tree.Set("1", 1);
+    tree.Set("3", 3);
+
+    TestTree tree2(std::move(tree));
+    CHECK(tree.node_count() == 0);
+    CHECK_THAT(tree.root_node(),
+               MatchesStructure(std::unique_ptr<const MatcherNode<std::string>>()));
+    CHECK(tree2.node_count() == 3);
+    CHECK_THAT(tree2.root_node(), MatchesStructure(NewNode({
+                                      .key = "2",
+                                      .lower = NewNode({.key = "1"}),
+                                      .higher = NewNode({.key = "3"}),
+                                  })));
+    CHECK_THAT(tree2.Get("1"), NodeValueMatches(1));
+    CHECK_THAT(tree2.Get("2"), NodeValueMatches(2));
+    CHECK_THAT(tree2.Get("3"), NodeValueMatches(3));
+
+    tree = std::move(tree2);
+    CHECK(tree2.node_count() == 0);
+    CHECK_THAT(tree2.root_node(),
+               MatchesStructure(std::unique_ptr<const MatcherNode<std::string>>()));
+    CHECK(tree.node_count() == 3);
+    CHECK_THAT(tree.root_node(), MatchesStructure(NewNode({
+                                     .key = "2",
+                                     .lower = NewNode({.key = "1"}),
+                                     .higher = NewNode({.key = "3"}),
+                                 })));
+    CHECK_THAT(tree.Get("1"), NodeValueMatches(1));
+    CHECK_THAT(tree.Get("2"), NodeValueMatches(2));
+    CHECK_THAT(tree.Get("3"), NodeValueMatches(3));
+  }
+
   SECTION("uncopyable value type") {
     NoCopyTree tree;
     std::optional<std::unique_ptr<std::string>> old_value;

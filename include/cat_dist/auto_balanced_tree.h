@@ -37,6 +37,11 @@ class AutoBalancedTree {
   using NP = typename TreeNodeOperations<N>::NP;
 
   AutoBalancedTree() = default;
+  AutoBalancedTree(AutoBalancedTree&& other);
+  AutoBalancedTree& operator=(AutoBalancedTree&& other);
+  AutoBalancedTree(const AutoBalancedTree& other) = delete;
+  AutoBalancedTree& operator=(const AutoBalancedTree& other) = delete;
+
   AutoBalancedTree DeepCopy() const;
   void ClearAll();
 
@@ -89,6 +94,23 @@ template <class N>
 AutoBalancedTree<N> AutoBalancedTree<N>::DeepCopy() const {
   return AutoBalancedTree<N>(node_count_,
                              root_node_ ? TreeNodeOperations<N>::CopyNode(*root_node_) : nullptr);
+}
+
+template <class N>
+AutoBalancedTree<N>::AutoBalancedTree(AutoBalancedTree&& other) {
+  node_count_ = other.node_count_;
+  other.node_count_ = 0;
+  root_node_ = std::move(other.root_node_);
+}
+
+template <class N>
+AutoBalancedTree<N>& AutoBalancedTree<N>::operator=(AutoBalancedTree&& other) {
+  if (&other != this) {
+    node_count_ = other.node_count_;
+    other.node_count_ = 0;
+    root_node_ = std::move(other.root_node_);
+  }
+  return *this;
 }
 
 template <class N>
