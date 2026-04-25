@@ -8,11 +8,13 @@ examples/build$ ./random_weighted
 
 examples/build$ ./random_permutation
 0000011222222222
-0210022212022202
+2202010022022122
+2212102202020022
+2220122120002220
 
 examples/build$ ./random_permutation | ./data_fitting
 Reading data from stdin...
-0: 10
-1: 4
-2: 18
+0: 20
+1: 8
+2: 36
 ```

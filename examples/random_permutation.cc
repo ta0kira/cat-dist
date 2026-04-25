@@ -45,15 +45,18 @@ int main() {
   }
   std::cout << std::endl;
 
-  // Destructively generate the permutation. (Make a copy first with
-  // `DeepCopy()` if needed.)
-  while (categories.GetTotalWeight() > 0) {
-    const int target_weight = categories.GetTotalWeight() * distribution(generator);
-    // Use a -1 adjustment to decrement the weight of the chosen category.
-    const std::optional<std::string> chosen = categories.LocateByWeight(target_weight, -1);
-    // Should never be empty if `target_weight` is in the valid range.
-    assert(chosen);
-    std::cout << *chosen;
+  // Generate 3 permutations.
+  for (int i = 0; i < 3; ++i) {
+    // Permutation generation is destructive, so we need to make a copy.
+    auto copy = categories.DeepCopy();
+    while (copy.GetTotalWeight() > 0) {
+      const int target_weight = copy.GetTotalWeight() * distribution(generator);
+      // Use a -1 adjustment to decrement the weight of the chosen category.
+      const std::optional<std::string> chosen = copy.LocateByWeight(target_weight, -1);
+      // Should never be empty if `target_weight` is in the valid range.
+      assert(chosen);
+      std::cout << *chosen;
+    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
 }
