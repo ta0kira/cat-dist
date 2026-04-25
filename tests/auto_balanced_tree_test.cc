@@ -42,6 +42,18 @@ class TestNode {
 
   TestNode(K key, V value) : key_(std::move(key)), value_(std::move(value)) {}
 
+  std::unique_ptr<TestNode> CopyNode() const {
+    std::unique_ptr<TestNode> new_node = std::make_unique<TestNode>(key_, value_);
+    if (higher_child_) {
+      new_node->lower_child_ = lower_child_->CopyNode();
+    }
+    if (higher_child_) {
+      new_node->higher_child_ = higher_child_->CopyNode();
+    }
+    new_node->UpdateNode();
+    return new_node;
+  }
+
   const std::unique_ptr<TestNode>& GetHigherNode() const { return higher_child_; }
   const std::unique_ptr<TestNode>& GetLowerNode() const { return lower_child_; }
   const K& GetKey() const { return key_; }
@@ -387,6 +399,23 @@ TEST_CASE("AutoBalancedTree") {
     old_value = 3;
     tree.Unset("1", &old_value);
     CHECK(old_value == std::nullopt);
+  }
+
+  SECTION("deep copy") {
+    tree.Set("2", 2);
+    tree.Set("1", 1);
+    tree.Set("3", 3);
+    TestTree tree2(tree.DeepCopy());
+    tree.ClearAll();
+    CHECK(tree2.node_count() == 3);
+    CHECK_THAT(tree2.root_node(), MatchesStructure(NewNode({
+                                      .key = "2",
+                                      .lower = NewNode({.key = "1"}),
+                                      .higher = NewNode({.key = "3"}),
+                                  })));
+    CHECK_THAT(tree2.Get("1"), NodeValueMatches(1));
+    CHECK_THAT(tree2.Get("2"), NodeValueMatches(2));
+    CHECK_THAT(tree2.Get("3"), NodeValueMatches(3));
   }
 
   SECTION("uncopyable value type") {
